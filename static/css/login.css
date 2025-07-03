@@ -1,0 +1,55 @@
+.form-container {
+    position: relative;
+    max-width: 500px;
+    width: 90%;
+    margin: auto;
+    padding: 2rem;
+    background: rgba(30, 30, 30, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    color: #fff;
+}
+
+.form-container h1 {
+    font-size: 1.75rem;
+    font-weight: bold;
+}
+
+.form-control {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #fff;
+}
+
+.form-control::placeholder {
+    color: #ccc;
+}
+
+.form-control:focus {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+
+.btn.toggle_see_pass {
+    background: transparent;
+    color: #ccc;
+    border: none;
+    font-size: 1.1rem;
+}
+
+.alert {
+    font-size: 0.85rem;
+}
+
+@media (max-width: 576px) {
+    .form-container {
+        padding: 1rem;
+        border-radius: 10px;
+    }
+
+    .form-container h1 {
+        font-size: 1.3rem;
+    }
+}

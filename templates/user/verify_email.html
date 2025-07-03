@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    <title>Verificar correo</title>
+{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'css/verify.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 class="text-center mb-4">Verifica tu correo</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <p class="mb-3 text-center">Hemos enviado un código de verificación a <strong>{{ username }}</strong>. Por favor, ingrésalo a continuación.</p>
+
+    <form method="post" class="mb-3">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary">Verificar</button>
+        </div>
+    </form>
+
+    {% if resend_allowed %}
+        <div class="text-center mt-3">
+            <a href="{% url 'resend_code' username=username %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-repeat"></i> Reenviar código
+            </a>
+        </div>
+    {% else %}
+        <small class="text-muted d-block text-center mt-2">
+            Puedes reenviar el código después de desbloquearte.
+        </small>
+    {% endif %}
+</div>
+{% endblock %}

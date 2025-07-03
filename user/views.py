@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from .models import User
 from django.utils.decorators import method_decorator
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from django.urls import reverse
 from .forms import User_form, Login_form
 from django.contrib.auth.views import LoginView
@@ -33,10 +33,11 @@ class Login(LoginView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        if User.groups.filter(name="Empresa").exists():
-            return redirect('PorMás:vistaempresa')
+        user = self.request.user
+        if user.groups.filter(name='Empresa').exists():
+            return reverse('vistaempresa')
         else:
-            return redirect('PorMás:index')
+            return reverse('index')
 
 
 class Register(CreateView):
@@ -58,7 +59,8 @@ class Register(CreateView):
 
             # Si NO está logueado o no es el dueño, enviar aviso al dueño
             subject = 'Alguien intentó usar tu correo'
-            message = f'Un intento de registro fue realizado con tu correo {email}. Si no fuiste tú, por favor toma medidas.'
+            message = f'Un intento de registro fue realizado con tu correo {email}. ' \
+                      f'Si no fuiste tú, por favor toma medidas.'
             email_from = settings.EMAIL_HOST_USER
             recipient_list = [existing_user.email]
 
@@ -188,19 +190,16 @@ class User_list(ListView):
     template_name = 'user/user_list.html'
 
 
-@method_decorator(login_required, name='dispatch')
-class User_update(UpdateView):
-    queryset = User.objects.all()
-    template_name = 'user/user_update.html'
-    form_class = User_form
-
-    def get_success_url(self):
-        return reverse('user:list')
-
-
 @login_required
 def user_update(request, pk):
     user = User.objects.get(pk=pk)
+
+    # Si el usuario que se está editando es el mismo que está logueado
+    if request.user.pk == user.pk:
+        editing_self = True
+    else:
+        editing_self = False
+
     if request.method == 'POST':
         form = User_form(request.POST, instance=user, pk=pk)
         group = Group.objects.get(name=request.POST['roles'])
@@ -215,12 +214,17 @@ def user_update(request, pk):
                 user.is_staff = True
                 user.is_superuser = True
 
+            # Si estoy editando mi propia cuenta, asegurarme que no pierdo acceso
+            if editing_self:
+                user.is_staff = True
+                user.is_superuser = True
+                user.groups.add(Group.objects.get(name='Administrador'))
+
             form.save()
             return redirect('user:list')
 
     else:
-        form = User_form(instance=User.objects.get(pk=pk), pk=pk)
+        form = User_form(instance=user, pk=pk)
 
     context = {'form': form}
-
     return render(request, 'user/user_update.html', context)
