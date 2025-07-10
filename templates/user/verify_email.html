@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base2.html" %}
 {% load static %}
 
 {% block title %}
@@ -33,7 +33,7 @@
 
     {% if resend_allowed %}
         <div class="text-center mt-3">
-            <a href="{% url 'resend_code' username=username %}" class="btn btn-outline-secondary btn-sm">
+            <a href="{% url 'user:resend_code' username=username %}" class="btn btn-outline-secondary btn-sm">
                 <i class="bi bi-arrow-repeat"></i> Reenviar código
             </a>
         </div>

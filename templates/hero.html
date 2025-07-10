@@ -1,0 +1,33 @@
+ {% load static %}
+<!-- ======= Hero Section ======= -->
+<section id="hero" class="d-flex align-items-center" style="
+        background: url({% static 'img/fondo1.jpg' %});
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-size: cover;
+        ">
+    <div class="container d-flex flex-wrap justify-content-between" data-aos="zoom-in" data-aos-delay="100" style="z-index: 1; position: relative">
+    <div class="d-flex justify-content-between rounded-4 p-4 init" style=" z-index: 1; position: relative">
+        {% if is_Empresa %}
+            <div class="d-inline-block">
+            <h1>Gestión de Empresa <span>Por Más</span></h1>
+        </div>
+        {% elif user.is_staff or is_Administrador %}
+            <h1>Administrar <span>Por Más</span></h1>
+        {% elif is_Gerente %}
+            <h1>Gestionar <span>Por Más</span></h1>
+        {% else %}
+        <div class="d-inline-block">
+            <h1>Bienvenidos a <span>Por Más</span></h1>
+            <h4>Lo que no se muestra no se vende!</h4>
+        </div>
+
+        <div class="ms-5" data-aos="zoom-in" data-aos-delay="200">
+          <a href="{% static 'img/Promo.mp4' %}" class="glightbox play-btn"></a>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </section><!-- End Hero -->

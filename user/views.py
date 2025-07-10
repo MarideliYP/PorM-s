@@ -55,7 +55,8 @@ class Register(CreateView):
             if self.request.user.is_authenticated and self.request.user == existing_user:
                 # Autenticar y redirigir directamente
                 login(self.request, existing_user)
-                return redirect('PorMás:vistaempresa' if existing_user.groups.filter(name="Empresa").exists() else 'PorMás:index')
+                return redirect('PrMas:vistaempresa' if existing_user.groups.filter(name="Empresa").exists()
+                                else 'PrMas:index')
 
             # Si NO está logueado o no es el dueño, enviar aviso al dueño
             subject = 'Alguien intentó usar tu correo'
@@ -84,7 +85,7 @@ class Register(CreateView):
         recipient_list = [user.email]
         send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list, fail_silently=False)
 
-        return redirect('verify_email', username=user.username)
+        return redirect('user:verify_email', username=user.username)
 
     def form_invalid(self, form):
         return render(self.request, self.template_name, {
@@ -118,7 +119,7 @@ def verify_email_view(request, username):
                 user.code_blocked_until = None
                 user.save()
                 messages.success(request, '✅ ¡Correo verificado exitosamente!')
-                return redirect('login')
+                return redirect('user:login')
             else:
                 user.failed_attempts += 1
                 if user.failed_attempts >= 5:
@@ -146,7 +147,7 @@ def resend_code_view(request, username):
 
     if user.code_blocked_until and now < user.code_blocked_until:
         messages.warning(request, 'Aún estás bloqueado por demasiados intentos.')
-        return redirect('verify_email', username=username)
+        return redirect('user:verify_email', username=username)
 
     code = generate_verification_code()
     user.verification_code = code
@@ -161,7 +162,7 @@ def resend_code_view(request, username):
     send_mail(subject, message, email_from, recipient_list)
 
     messages.success(request, '📧 Nuevo código enviado.')
-    return redirect('verify_email', username=username)
+    return redirect('user:verify_email', username=username)
 
 
 def logout_view(request):

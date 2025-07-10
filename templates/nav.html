@@ -1,6 +1,6 @@
 {% load static %}
 
-<header class="root__header shadow-sm pb-2 position-fixed w-100 top-0">
+<header class="root__header shadow-sm pb-2 position-fixed w-100 top-0" style="z-index: 100000">
      <div class="header__content">
         <figure class="header__logo mt-0">
             <img src="{% static 'img/logo.png' %}" alt="">
@@ -41,29 +41,15 @@
                     </a>
                     {% endif %}
                 </div>
-
-
             </div>
-
 
             <ul class="nav__menu">
                 <li class="menu__item">
                     <a href="#" class="nav__link">Inicio</a>
                 </li>
-                <li class="menu__item">
-                        <span class="banel_info">New</span>
-                        <span class="nav__parent">Ofertas relevantes<img class="nav__parent--img" src="{% static 'svg/caret-down.svg' %}" alt=""></span>
-                        <ul class="nav__submenu ps-0">
-                            <li class="item__submenu"><a href="#" class="nav__dropdown">Lo más buscado</a></li>
-                            <li class="item__submenu"><a href="#" class="nav__dropdown">Marketing Digital</a></li>
-                            <li class="item__submenu"><a href="#" class="nav__dropdown">Promoción y Publicidad</a></li>
-                            <li class="item__submenu"><a href="#" class="nav__dropdown">Diseño de Carteles y Fotos</a></li>
-                            <li class="item__submenu"><a href="#" class="nav__dropdown">Gestión de Compra y Venta</a></li>
-                        </ul>
-                    </li>
                 {% if user.is_staff %}
                     <li class="menu__item">
-                        <span class="nav__parent">Usuarios<img class="nav__parent--img" src="{% static 'svg/caret-down.svg' %}" alt=""></span>
+                        <span class="nav__parent">Usuarios<img class="nav__parent--img mt-1" src="{% static 'svg/caret-down.svg' %}" alt=""></span>
                         <ul class="nav__submenu ps-0">
                             <li class="item__submenu"><a class="nav__dropdown" href="{% url "user:list" %}"> Listar Usuarios</a>
                             </li>
@@ -73,27 +59,25 @@
                     </li>
 
                     <li class="menu__item nav-item ">
-                        <span class="nav__parent">Productos<img class="nav__parent--img" src="{% static 'svg/caret-down.svg' %}" alt=""></span>
-                        <ul class="nav__submenu ps-0">
-                            <li class="item__submenu"><a class="nav__dropdown" href="#"> Listar Productos</a>
-                            </li>
-                            <li class="item__submenu"><a class="nav__dropdown" href="#"> Nuevo Producto</a>
-                            </li>
-                        </ul>
+                        <a class="nav-link" href="#menu">
+                            <span class="nav__parent">Productos</span></a>
+                    </li>
+
+                    <li class="menu__item">
+                        <span class="banel_info">New</span>
+                        <a class="nav-link " href="#specials">
+                            <span class="nav__parent">Ofertas</span>
+                        </a>
                     </li>
 
                     <li class="menu__item nav-item">
-                        <span class="nav__parent">Eventos<img class="nav__parent--img" src="{% static 'svg/caret-down.svg' %}" alt=""></span>
-                        <ul class="nav__submenu ps-0">
-                            <li class="item__submenu"><a class="nav__dropdown" href="#"> Listar Eventos</a>
-                            </li>
-                            <li class="item__submenu"><a class="nav__dropdown" href="#"> Nuevo Evento</a>
-                            </li>
-                        </ul>
+                        <a class="nav-link" href="#events">
+                        <span class="nav__parent">Eventos</span>
+                        </a>
                     </li>
                 {% endif %}
                 <li class="menu__item nav-item border-end-0">
-                    <span class="nav__parent">Contactos<img class="nav__parent--img" src="{% static 'svg/caret-down.svg' %}" alt=""></span>
+                    <span class="nav__parent">Contactos<img class="nav__parent--img mt-1" src="{% static 'svg/caret-down.svg' %}" alt=""></span>
                     <ul class="nav__submenu ps-0">
                         <li class="item__submenu"><p class="nav__dropdown"> +53 </p></li>
                         <li class="item__submenu"><p class="nav__dropdown"> +53 </p></li>
