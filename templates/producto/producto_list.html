@@ -29,8 +29,8 @@
 
     <div class="row menu-container justify-content-center" data-aos="fade-up" data-aos-delay="200">
       {% for producto in productos %}
-        <div class="col-lg-3 col-md-4 col-sm-6 p-2 menu-item filter-{{ producto.tipo }}">
-          <div class="card h-100 shadow-sm bg-dark text-white rounded-3 overflow-hidden d-inline-block" style="width: fit-content;">
+        <div class="col-lg-3 col-md-4 col-sm-6 menu-item filter-{{ producto.tipo }}">
+          <div class="card h-100 shadow-sm bg-dark text-white rounded-3 overflow-hidden">
             <!-- Imagen centrada -->
             <div class="text-center">
               <img src="{{ producto.image.url }}" class="card-img-top special-img" alt="Imagen de {{ producto.nombreP }}" style="object-fit: cover; width: 250px; height: 250px;">
