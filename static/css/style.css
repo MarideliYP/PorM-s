@@ -984,6 +984,7 @@ section {
 
   .specials .details h3 {
     font-size: 22px;
+      text-align: center;
   }
 
   .specials .details .btns {

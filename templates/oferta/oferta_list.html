@@ -19,7 +19,7 @@
     <div class="row justify-content-center">
 
       <!-- Tabs solo en desktop -->
-      <div class="col-lg-3 d-none d-lg-block">
+      <div class="col-lg-3 d-none d-md-block">
         <ul class="nav nav-tabs flex-column" role="tablist">
           {% for oferta in ofertas %}
             <li class="nav-item" role="presentation">
@@ -55,15 +55,15 @@
                   <p class="fst-italic"> ${{ oferta.precio }} </p>
                   <div class="d-flex justify-content-center">
                     {% if is_Cliente %}
-                      <a href="{% url 'producto:add_producto_carrito' oferta.pk %}" class="btn-menu"><img src="{% static 'img/añadir.png' %}" alt=""></a>
+                      <a href="{% url 'producto:add_producto_carrito' oferta.pk %}" class="btn-menu m-5"><img src="{% static 'img/añadir.png' %}" alt=""></a>
                     {% elif user.is_staff or is_Administrador %}
-                      <a href="{% url 'producto:deleteo' oferta.pk %}" class="btn-menu"><img src="{% static 'img/eliminar.png' %}" alt=""></a>
-                      <a href="{% url 'producto:updateo' oferta.pk %}" class="btn-menu"><img src="{% static 'img/editar.png' %}" alt=""></a>
+                      <a href="{% url 'producto:deleteo' oferta.pk %}" class="btn-menu m-5"><img src="{% static 'img/eliminar.png' %}" alt=""></a>
+                      <a href="{% url 'producto:updateo' oferta.pk %}" class="btn-menu m-5"><img src="{% static 'img/editar.png' %}" alt=""></a>
                     {% endif %}
                   </div>
                 </div>
                 <div class="col-md-5 col-12 d-flex justify-content-center justify-content-lg-start order-md-1 order-1 order-lg-2">
-                  <img src="{{ oferta.image.url }}" class="special-img mb-5 rounded-4" alt="" style="max-width: 100%; height: auto;">
+                  <img src="{{ oferta.image.url }}" class="special-img mb-2 rounded-4" alt="" style="max-width: 100%; height: auto;">
                 </div>
               </div>
             </div>
@@ -91,14 +91,12 @@
     const tabs = $('.tab-pane');
     const totalTabs = tabs.length;
 
-    // Función para mostrar una oferta
     function showTab(index) {
       tabs.removeClass('active show');
       tabs.eq(index).addClass('active show');
       $('#currentOfertaIndex').text(`${index + 1} / ${totalTabs}`);
     }
 
-    // Eventos de los botones
     $('#prevOferta').on('click', function () {
       currentIndex = (currentIndex - 1 + totalTabs) % totalTabs;
       showTab(currentIndex);
@@ -109,7 +107,6 @@
       showTab(currentIndex);
     });
 
-    // Inicialización
     showTab(currentIndex);
   });
 </script>
