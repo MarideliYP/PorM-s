@@ -1,0 +1,64 @@
+.submenu{
+    position: relative;
+}
+
+.submenu #carrito-div{
+    display: none;
+}
+
+.submenu:hover #carrito-div{
+    display: block;
+    right: 20%;
+    position: absolute;
+    backdrop-filter: blur(10px);
+    background-color: #4E4B5076;
+    z-index: 10;
+    width: 35em;
+}
+
+.menu {
+    max-height: 500px;
+    overflow:hidden scroll;
+}
+
+.menu #carrito-div{
+    right: 20%;
+    backdrop-filter: blur(10px);
+    background-color: #4E4B5076;
+}
+
+table{
+    width: 100%;
+}
+
+.borrar{
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.fade-in {
+    opacity: 0;
+    animation: fade-in 1s ease-in, fade-out 4s 1s ease-out;
+}
+
+@keyframes fade-in {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes fade-out {
+    0% {
+        opacity: 1;
+    }
+    60%{
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+

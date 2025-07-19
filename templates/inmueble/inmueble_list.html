@@ -1,0 +1,73 @@
+{% load static %}
+<!-- ======= Menu Section ======= -->
+<section id="inmueble" class="menu section-bg">
+  <div class="container aos-init aos-animate" data-aos="fade-up">
+
+    {% if user.is_staff %}
+      <div class="section-title">
+        <h2>Administrar inmueble</h2>
+        <br>
+      </div>
+    {% endif %}
+
+    <div class="d-flex section-title justify-content-start">
+        <a href="{% url 'producto:addi' %}" class="book-a-table-btn nav-link text-center me-3">Añadir inmueble</a>
+        <a href="#" class="book-a-table-btn nav-link text-center" >Gestionar contrato</a>
+    </div>
+    <div class="section-title text-center">
+        <p>Inmuebles Disponibles</p>
+    </div>
+    <div class="row justify-content-center" data-aos="fade-up" data-aos-delay="100">
+      <div class="col-lg-12 d-flex justify-content-center">
+        <ul id="menu-flters">
+          <li data-filter="*" class="filter-active">Todos</li>
+          <li data-filter=".filter-perfumes">Diez de Octubre</li>
+          <li data-filter=".filter-bebidas">Guanabacoa</li>
+          <li data-filter=".filter-articulo-hogar">Cerro</li>
+          <li data-filter=".filter-inmuebles">Playa</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="row menu-container justify-content-center" data-aos="fade-up" data-aos-delay="200">
+      {% for inmueble in inmuebles %}
+        <div class="col-lg-3 col-md-4 col-sm-6 menu-item filter-{{ inmueble.tipo }}">
+          <div class="card h-100 shadow-sm bg-dark text-white rounded-3 overflow-hidden">
+            <!-- Imagen centrada -->
+            <div class="text-center">
+              <img src="{{ inmueble.image.url }}" class="card-img-top special-img" alt="Imagen de {{ inmueble.nombreI }}" style="object-fit: cover; width: 250px; height: 250px;">
+            </div>
+
+            <!-- Contenido -->
+            <div class="card-body d-flex flex-column" >
+              <!-- Nombre -->
+              <h5 class="card-title text-start mb-2">{{ inmueble.nombreI }}</h5>
+
+              <!-- Descripción -->
+              <p class="card-text text-start mb-3 flex-grow-1">{{ inmueble.detalles|truncatechars:90 }}</p>
+
+              <!-- Precio y botones -->
+              <div class="btns p-0 border-0 d-flex justify-content-between">
+                <!-- Precio -->
+                <span class="text-warning fs-5">${{ inmueble.precio }}</span>
+
+                <!-- Botones -->
+                    <a href="{% url 'producto:add_producto_carrito' inmueble.pk %}" class="nav-link">
+                      <img src="{% static 'img/añadir.png' %}" alt="Añadir al carrito">
+                    </a>
+                  {% if user.is_staff or is_Adminisrtador %}
+                    <a href="{% url 'producto:updatei' inmueble.pk %}" class="nav-link">
+                      <img src="{% static 'img/editar.png' %}" alt="Editar">
+                    </a>
+                    <a href="{% url 'producto:deletei' inmueble.pk %}" class="nav-link">
+                      <img src="{% static 'img/eliminar.png' %}" alt="Eliminar">
+                    </a>
+                  {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>

@@ -45,7 +45,7 @@
           image: "{{ evento.image.url }}",
           {% if is_Cliente %}
             btns: `
-              <a href="{% url 'producto:add-producto-carrito' evento.pk %}" class="btn-menu">
+              <a href="{% url 'producto:add_producto_carrito' evento.pk %}" class="btn-menu">
                 <img src="{% static 'img/añadir.png' %}" alt="Añadir">
               </a>`
           {% elif user.is_staff or is_Adminisrtador %}
@@ -64,7 +64,7 @@
       {% endfor %}
     ];
 
-    const eventosPorPagina = 4;
+    const eventosPorPagina = 6;
     let paginaActual = 0;
 
     // Función para renderizar eventos según la página

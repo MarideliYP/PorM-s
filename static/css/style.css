@@ -34,12 +34,9 @@ body {
 
 .header__logo {
     width: max-content;
-    height: 70px;
 }
 
 .header__logo > img {
-    margin-top: -6px;
-    margin-left: 10px;
     height: 93px;
     width: 125px;
 }
@@ -48,6 +45,7 @@ body {
     width: 40px;
     height: 40px;
     cursor: pointer;
+    margin-right: -10em;
     z-index: 2000;
     background-image: url('../svg/bars.svg');
     background-position: center;
@@ -57,7 +55,6 @@ body {
 
 .header__menu--close {
     background-image: url('../svg/xmark.svg');
-
 }
 
 /* --------------------------------- NAV ---------------------*/
@@ -168,16 +165,9 @@ body {
 }
 
 .nav__menu {
-    grid-area: navbar;
-    display: flex;
-    height: 50%;
-    margin-top: -2vh;
-    margin-right: 15px;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    list-style-type: none;
-    gap: 30px;
+
 }
 
 .menu__item, .nav__dropdown {
@@ -212,13 +202,9 @@ body {
     transform: rotateZ(180deg);
 }
 
-.menu__item--icons {
-    margin-top: auto;
-    display: flex;
-    width: 100%;
-    gap: 30px;
-    align-items: center;
-    justify-content: center;
+.menu__item--icons a{
+    margin-right: 2px;
+    text-decoration: none;
 }
 
 .nav__icon--img {
@@ -259,8 +245,7 @@ body {
 
 .banel_info {
     position: absolute;
-    content: '';
-    left: 14px;
+    top: -4px;
     font-size: 10px;
     color: #fff;
     padding: 2px 5px;
@@ -865,29 +850,71 @@ section {
     padding: 0 10px 10px 10px;
 }
 
-.menu .btns {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
+
+.menu .btns img{
+    width: 24px;
+    height: 24px;
+}
+
+/*--------------------------------------------------------------
+# Productos Section
+--------------------------------------------------------------*/
+
+.productos .section-title h2 {
+    color: #ffffff;
+}
+
+.productos .section-title h2::after {
+    content: "";
+    width: 120px;
+    height: 1px;
+    display: inline-block;
+    background: #ffffff;
+    margin: 4px 10px;
+}
+
+.productos #productos-flters li {
+    cursor: pointer;
+    display: inline-block;
+    padding: 8px 12px 10px 12px;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1;
+    color: #ffffff;
+    margin-bottom: 10px;
+    transition: all ease-in-out 0.3s;
+    border-radius: 50px;
+    font-family: "Playfair Display", serif;
+}
+
+.productos #productos-flters li:hover,
+.productos #productos-flters li.filter-active {
+    color: #da4800;
+}
+
+.productos #productos-flters li:last-child {
+    margin-right: 0;
+}
+
+.productos .productos-content a {
+    font-size: 1.1rem;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.productos .productos-content a:hover {
+    color: #dc4900;
+}
+
+.productos .productos-detalles {
+    font-size: 0.9rem;
+    font-family: "Poppins", sans-serif;
+    color: #ffffff;
+    text-align: center;
     padding: 0 10px 10px 10px;
 }
 
-.menu .btns .btn-menu {
-    display: inline-block;
-    background: none;
-    border: none;
-    padding: 0;
-    margin: 0;
-}
-
-.menu .btns img {
-    width: 24px;
-    transition: transform 0.2s;
-}
-
-.menu .btns img:hover {
-    transform: scale(1.1);
-}
 /*--------------------------------------------------------------
 # Specials
 --------------------------------------------------------------*/
@@ -1124,11 +1151,16 @@ section {
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 1px;
-  transition: 0.3s
+  transition: 0.3s;
+    max-width: 20em;
 }
 
 .book-a-table-btn:hover {
   background: #dc4900;
+}
+
+#book-a-table-btn:hover {
+  color: #000000!important;
 }
 
 @media (max-width: 1000px) {
@@ -1143,10 +1175,6 @@ section {
 --------------------------------------------------------------*/
 .events{
     background: #1a1814;
-}
-
-#book-a-table-btn:hover {
-  color: #000000!important;
 }
 
 .evento-card {
@@ -1293,10 +1321,12 @@ section {
 
     .header__content {
         grid-area: logo;
-        display: inline-block;
-        width: max-content;
         height: 80px;
         margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
     }
 
     .nav {
@@ -1317,10 +1347,7 @@ section {
         grid-template-rows: repeat(2,40px);
         grid-template-areas: "search" "navbar";
         padding-top: 0;
-        justify-content: center;
         align-items: center;
-        padding-left: 10px;
-        padding-right: 10px;
         overflow: visible;
     }
 
@@ -1362,30 +1389,24 @@ section {
         justify-content: space-between;
         align-items: center;
         gap: 10px;
-        margin: 0px;
+        margin: 0;
     }
 
     .nav__menu {
-        grid-area: navbar;
-        width: 100%;
         flex-direction: row;
-        padding-bottom: 5px;
         overflow: visible;
-        margin-top: 4vh;
-        gap: 0px;
-    }
-
-    .menu__item {
-        width: max-content;
-        padding-right: 9px;
     }
 
     .menu__item {
         border-right: 1px solid #666;
     }
 
+    .menu__item a{
+        padding: 0;
+    }
+
     .nav__link {
-        padding: 0px 25px;
+        padding: 0 25px;
     }
 
     .login__link {
@@ -1401,10 +1422,8 @@ section {
         padding: 0 25px;
     }
 
-    .menu__item--icons {
-        margin-top: 0;
-        margin-left: auto;
-        gap: 15px;
+    .menu__item--icons a{
+        padding-right: 2px;
     }
 
     .nav__submenu {

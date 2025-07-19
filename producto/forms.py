@@ -1,4 +1,4 @@
-from .models import Producto, Oferta, Evento, Reserva
+from .models import Producto, Inmueble, Oferta, Evento, Reserva
 from django import forms
 
 
@@ -28,10 +28,10 @@ class Producto_form(forms.ModelForm):
     tipo = forms.ChoiceField(
         choices=[
             (None, 'Seleccione el tipo de producto'),
-            ('perfumes', 'Perfumes'),
-            ('bebidas', 'Bebidas'),
+            ('turismo', 'Turismo'),
+            ('comidas-bebidas', 'Comidas y bebidas'),
             ('articulo-hogar', 'Articulos del hogar'),
-            ('inmuebles', 'Inmuebles'),
+            ('belleza', 'Belleza'),
         ],
 
         widget=forms.Select(attrs={'class': 'form-control form-select bg-transparent border-0 '
@@ -50,6 +50,73 @@ class Producto_form(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(Producto_form, self).__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.error_messages = {
+                'required': 'Por favor llene este campo',
+                'invalid_image': 'Imagen no válida',
+                'max_length': 'Asegúrese que este valor tenga cuando más %(limit_value)d caracteres (tiene %('
+                              'show_value)d).',
+            }
+
+
+class Inmueble_form(forms.ModelForm):
+    nombreI = forms.CharField(
+        max_length=220,
+        label='Nombre del Inmueble',
+        widget=forms.TextInput(attrs={'class': 'form-control mb-3'})
+    )
+
+    detalles = forms.CharField(
+        max_length=1000,
+        label='Detalles del Inmueble',
+        widget=forms.TextInput(attrs={'class': 'form-control mb-3'})
+    )
+
+    image = forms.ImageField(
+        label='Imagen del Inmueble',
+        widget=forms.FileInput(attrs={'class': 'form-control mb-3'})
+    )
+
+    precio = forms.IntegerField(
+        label='Precio del Inmueble',
+        widget=forms.NumberInput(attrs={'class': 'form-control mb-3 '})
+    )
+
+    tipo = forms.ChoiceField(
+        choices=[
+            (None, 'Seleccione el municipio del inmueble'),
+            ('arroyo_naranjo', 'Arroyo Naranjo'),
+            ('boyeros', 'Boyeros'),
+            ('cerro', 'Cerro'),
+            ('cotorro', 'Cotorro'),
+            ('diez_de_octubre', 'Diez de Octubre'),
+            ('guanabacoa', 'Guanabacoa'),
+            ('habana_del_este', 'La Habana del Este'),
+            ('habana_vieja', 'La Habana Vieja'),
+            ('la Lisa', 'La Lisa'),
+            ('marianao', 'Marianao'),
+            ('playa', 'Playa'),
+            ('plaza', 'Plaza de la Revolución'),
+            ('regla', 'Regla'),
+            ('san_miguel_del_padron', 'San Miguel del Padrón'),
+        ],
+
+        widget=forms.Select(attrs={'class': 'form-control form-select bg-transparent border-0 '
+                                            'border-bottom rounded-0 border-light-subtle text-primary'})
+    )
+
+    class Meta:
+        model = Inmueble
+        fields = [
+            'nombreI',
+            'detalles',
+            'image',
+            'precio',
+            'tipo',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super(Inmueble_form, self).__init__(*args, **kwargs)
         for field in self.fields.values():
             field.error_messages = {
                 'required': 'Por favor llene este campo',

@@ -10,9 +10,10 @@
         {% include 'about.html' %}
     {% endif %}
 
-    {% include "producto/producto_list.html" %}
+    {% include "inmueble/inmueble_list.html" %}
     {% include "oferta/oferta_list.html" %}
     {% include "evento/evento_list.html" %}
+    {% include "producto/producto_list.html" %}
 
     {% for message in messages %}
         {% if 'error' in message.tags %}
