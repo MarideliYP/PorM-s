@@ -64,7 +64,7 @@
                 </div>
             {% endif %}
         {% endfor %}
-
+        {% if user.is_staff or is_Administrador %}
             <label for="roles">Rol:</label>
             <select class="form-select mb-4" name="roles" id="roles">
                 <option value="Cliente">Cliente</option>
@@ -72,8 +72,9 @@
                 <option value="Gerente">Gerente</option>
                 <option value="Administrador">Administrador</option>
             </select>
-
+        {% endif %}
             <div class="d-grid gap-2 d-md-flex justify-content-md-end p-2">
+                <a href="{% url 'index' %}" class="btn btn-danger">Canselar</a>
                 <input type="submit" value="Guardar" class="btn btn-success">
             </div>
         </form>

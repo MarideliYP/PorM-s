@@ -8,6 +8,16 @@ from django.contrib.auth.models import Group
 
 
 class User_form(forms.ModelForm):
+    image = forms.ImageField(
+        widget=forms.FileInput(
+            attrs={
+                'class': 'form-control mb-3',
+                'placeholder': 'Foto de perfil',
+            }
+        ),
+        label='Foto de perfil',
+    )
+
     username = forms.CharField(
         widget=forms.TextInput(
             attrs={
@@ -83,6 +93,7 @@ class User_form(forms.ModelForm):
     class Meta:
         model = User
         fields = [
+            'image',
             'username',
             'email',
             'first_name',

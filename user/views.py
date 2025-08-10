@@ -1,9 +1,13 @@
+import os
+
 from django.utils import timezone
 import datetime
 from django.contrib import auth
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
+
+from producto.models import Reserva
 from .models import User
 from django.utils.decorators import method_decorator
 from django.http import HttpResponseRedirect
@@ -173,8 +177,18 @@ def logout_view(request):
 
 @method_decorator(login_required, name='dispatch')
 class User_details(DetailView):
-    queryset = User.objects.all()
+    model = User
     template_name = 'user/user_details.html'
+    context_object_name = 'usuario'  # Nombre con el que accederás en el template
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        usuario = self.get_object()
+
+        # Obtener las reservas del usuario que se está viendo
+        context['reservas'] = Reserva.objects.filter(usuario=usuario).select_related('evento')
+
+        return context
 
 
 @login_required
@@ -229,3 +243,41 @@ def user_update(request, pk):
 
     context = {'form': form}
     return render(request, 'user/user_update.html', context)
+
+
+@login_required
+def update_img(request, pk):
+    # 1. Validar que el usuario solo pueda cambiar su propia foto (o es admin)
+    if request.user.pk != pk and not request.user.is_staff:
+        messages.error(request, "No tienes permiso para hacer esto.")
+        return redirect("user:details", pk=request.user.pk)
+
+    user = User.objects.get(pk=pk)
+
+    if request.method == 'POST':
+        # 2. Verificar si se subió un archivo
+        if 'image' in request.FILES:
+            new_image = request.FILES['image']
+
+            # 3. Validar extensión (solo .jpg, .jpeg, .png)
+            allowed_extensions = ['.jpg', '.jpeg', '.png']
+            ext = os.path.splitext(new_image.name)[1].lower()
+
+            if ext not in allowed_extensions:
+                messages.error(request, "❌ Solo se permiten archivos .jpg y .png.")
+                return redirect("user:details", pk=pk)
+
+            # 4. Opcional: eliminar la imagen anterior (si no es la por defecto)
+            if user.image and user.image.name != 'img/user.png':
+                if os.path.isfile(user.image.path):
+                    os.remove(user.image.path)
+
+            # 5. Asignar y guardar
+            user.image = new_image
+            user.save()
+            messages.success(request, "✅ Foto actualizada con éxito.")
+        else:
+            messages.warning(request, "⚠️ No seleccionaste ninguna imagen.")
+
+    return redirect("user:details", pk=pk)
+

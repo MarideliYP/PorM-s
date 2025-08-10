@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import Register, Login, logout_view, user_update, User_list, user_delete, User_details, verify_email_view, \
-    resend_code_view
+    resend_code_view, update_img
 
 app_name = 'user'
 
@@ -15,5 +15,6 @@ urlpatterns = [
     path('<int:pk>/details/', User_details.as_view(), name='details'),
     path('<int:pk>/delete/', user_delete, name='delete'),
     path('<int:pk>/update/', user_update, name='update'),
+    path('<int:pk>/updatei/', update_img, name='updatei'),
 ]
 

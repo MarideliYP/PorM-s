@@ -9,6 +9,7 @@ class User(AbstractUser):
     code_expiration = models.DateTimeField(blank=True, null=True)
     failed_attempts = models.PositiveIntegerField(default=0)
     code_blocked_until = models.DateTimeField(blank=True, null=True)
+    image = models.ImageField(upload_to='img/', default='img/user.png')
 
     def is_code_valid(self, entered_code):
         now = timezone.now()

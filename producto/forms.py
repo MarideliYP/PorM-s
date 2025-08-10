@@ -1,4 +1,4 @@
-from .models import Producto, Inmueble, Oferta, Evento, Reserva
+from .models import Producto, Inmueble, Oferta, Evento, Reserva, ContratoFirmado
 from django import forms
 
 
@@ -77,6 +77,14 @@ class Inmueble_form(forms.ModelForm):
         widget=forms.FileInput(attrs={'class': 'form-control mb-3'})
     )
 
+    numagente = forms.IntegerField(
+        label='Número de teléfono del agente inmobiliario',
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control mb-3',
+            'placeholder': 'Ej: +5351234567'
+        })
+    )
+
     precio = forms.IntegerField(
         label='Precio del Inmueble',
         widget=forms.NumberInput(attrs={'class': 'form-control mb-3 '})
@@ -111,6 +119,7 @@ class Inmueble_form(forms.ModelForm):
             'nombreI',
             'detalles',
             'image',
+            'numagente',
             'precio',
             'tipo',
         ]
@@ -199,6 +208,11 @@ class Evento_form(forms.ModelForm):
         widget=forms.FileInput(attrs={'class': 'form-control mb-3'})
     )
 
+    fechahora = forms.DateTimeField(
+        label='Fecha y hora',
+        widget=forms.DateTimeInput(attrs={'class': 'form-control mb-3'})
+    )
+
     preciocover = forms.FloatField(
         label='Precio del Cover',
         widget=forms.NumberInput(attrs={'class': 'form-control mb-3'})
@@ -215,6 +229,7 @@ class Evento_form(forms.ModelForm):
             'nombreE',
             'description',
             'image',
+            'fechahora',
             'preciocover',
             'capacidad'
         ]
@@ -232,21 +247,42 @@ class Evento_form(forms.ModelForm):
 
 class Reserva_form(forms.ModelForm):
     num_personas = forms.IntegerField(
-        max_value=500,
+        max_value=10,
+        min_value=1,
         label='Cantidad de Personas',
-        widget=forms.NumberInput(attrs={'class': 'form-control mb-3'})
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control mb-3',
+            'placeholder': 'Cantidad de personas (máx. 10)'
+        })
     )
 
     num_confirm = forms.IntegerField(
-        label='Número de teléfono a confirmar',
-        widget=forms.NumberInput(attrs={'class': 'form-control mb-3'})
+        label='Número de teléfono para confirmar',
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control mb-3',
+            'placeholder': 'Ej: 51234567'
+        })
+    )
+
+    estado = forms.BooleanField(
+        label='Confirmada',
+        required=False,
+        initial=False,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input',
+            'style': 'margin-left: 0; transform: scale(1.3);'
+        })
     )
 
     mensaje = forms.CharField(
-        max_length=30,
+        max_length=1000,
         required=False,
         label='Comentario o sugerencia (opcional)',
-        widget=forms.TextInput(attrs={'class': 'form-control mb-3'})
+        widget=forms.Textarea(attrs={
+            'class': 'form-control mb-3',
+            'rows': 3,
+            'placeholder': 'Algún comentario o petición especial...'
+        })
     )
 
     class Meta:
@@ -254,6 +290,7 @@ class Reserva_form(forms.ModelForm):
         fields = [
             'num_personas',
             'num_confirm',
+            'estado',
             'mensaje',
         ]
 

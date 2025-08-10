@@ -4,6 +4,7 @@
 
 {% block content %}
 
+
     {% include 'hero.html' %}
 
     {% if not user.is_authenticated %}
@@ -27,6 +28,7 @@
         {% endif %}
     {% endfor %}
 {% endblock %}
+
 
 {% block script %}
     <script src="{% static 'js/homepage.js' %}"></script>

@@ -1,4 +1,6 @@
 {% load static %}
+{% load filters %}
+
 <!-- ======= Menu Section ======= -->
 <section id="productos" class="productos bg-dark">
   <div class="container aos-init aos-animate" data-aos="fade-up">
@@ -17,25 +19,28 @@
       <p>Productos Disponibles</p>
     </div>
 
+    <!-- Filtros para Productos -->
     <div class="row justify-content-center" data-aos="fade-up" data-aos-delay="100">
       <div class="col-lg-12 d-flex justify-content-center">
         <ul id="productos-flters">
           <li data-filter="*" class="filter-active">Todo</li>
-          <li data-filter=".filter-perfumes">Comidas y bebidas</li>
-          <li data-filter=".filter-bebidas">Turismo</li>
-          <li data-filter=".filter-inmuebles">Belleza</li>
+          <li data-filter=".filter-comidas-bebidas">Comidas y bebidas</li>
+          <li data-filter=".filter-turismo">Turismo</li>
+          <li data-filter=".filter-belleza">Belleza</li>
           <li data-filter=".filter-articulo-hogar">Articulos del hogar</li>
         </ul>
       </div>
     </div>
 
-    <div class="row menu-container justify-content-center" data-aos="fade-up" data-aos-delay="200">
+    <div class="row menu-container justify-content-center" id="menu-wrapper" data-aos="fade-up" data-aos-delay="200">
       {% for producto in productos %}
-        <div class="col-lg-3 col-md-4 col-sm-6 mb-3 menu-item filter-{{ producto.tipo }}">
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-3 menu-item {{ producto|get_filter_class }}">
           <div class="card h-100 shadow-sm text-white rounded-3 overflow-hidden" style="background: #1e1e1e">
             <!-- Imagen centrada -->
             <div class="text-center">
-              <img src="{{ producto.image.url }}" class="card-img-top special-img" alt="Imagen de {{ producto.nombreP }}" style="object-fit: cover; width: 310px; height: 250px;">
+                <a href="{% url 'producto:producto_detalle' producto.pk %}" >
+                    <img src="{{ producto.image.url }}" class="card-img-top special-img" alt="Imagen de {{ producto.nombreP }}" style="object-fit: cover; width: 310px; height: 250px;">
+                </a>
             </div>
 
             <!-- Contenido -->
@@ -50,11 +55,12 @@
               <div class="btns p-0 border-0 d-flex justify-content-between">
                 <!-- Precio -->
                 <span class="text-warning fs-5">${{ producto.precio }}</span>
-
+                  {% if user.is_authenticated %}
                 <!-- Botones -->
                     <a href="{% url 'producto:add_producto_carrito' producto.pk %}" class="nav-link">
                       <img src="{% static 'img/añadir.png' %}" alt="Añadir al carrito">
                     </a>
+                  {% endif %}
                   {% if user.is_staff or is_Adminisrtador %}
                     <a href="{% url 'producto:updatep' producto.pk %}" class="nav-link">
                       <img src="{% static 'img/editar.png' %}" alt="Editar">
@@ -71,3 +77,25 @@
     </div>
   </div>
 </section>
+<script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const container = document.querySelector("#menu-wrapper");
+    const filters = document.querySelectorAll("#productos-flters li");
+
+    if (container && filters.length > 0) {
+      const iso = new Isotope(container, {
+        itemSelector: ".menu-item",
+        layoutMode: "fitRows"
+      });
+
+      filters.forEach(button => {
+        button.addEventListener("click", function () {
+          filters.forEach(btn => btn.classList.remove("filter-active"));
+          this.classList.add("filter-active");
+          iso.arrange({ filter: this.getAttribute("data-filter") });
+        });
+      });
+    }
+  });
+</script>

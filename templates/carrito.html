@@ -16,13 +16,15 @@
     <div class="rounded-3">
         <table class="table mb-0 tabla-hover rounded-3" >
             <thead class="rounded-3" >
+            <tr>
                 <td>Nombre del articulo</td>
                 <td>Cantidad actual</td>
                 <td>Acciones</td>
+            </tr>
             </thead>
             <tbody class="table-group-divider rounded-3 border-start border-end ">
-            {% if items.count > 0 %}
-                {% for item in items %}
+            {% if articulos.count > 0 %}
+                {% for item in articulos %}
                     <tr class="rounded-3">
                         <td class="ps-5 pt-3">{{ item.producto }}</td>
                         <td class="ps-5 pt-3">{{ item.cantidad }}
@@ -78,9 +80,13 @@
             </div>
         {% else %}
             <div class="text-secondary text-center">
-            <h2>Parece que no tienes artículos en tu carrito todavía</h2>
-            <p style="font-size: 4em">¯\_(ツ)_/¯</p>
-
+            {% if user.is_autenticated %}
+                <h2>Parece que no tienes artículos en tu carrito todavía</h2>
+                <p style="font-size: 4em">¯\_(ツ)_/¯</p>
+            {% else %}
+                <h2>Debes registrarte para poder añadir artículos en tu carrito</h2>
+                <p style="font-size: 4em">¯\_(ツ)_/¯</p>
+            {% endif %}
             </div>
         {% endif %}
     </div>

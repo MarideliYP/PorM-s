@@ -8,7 +8,7 @@
 {% block content %}
 <div class="form-container">
     <h1 class="text-center mb-4">Formulario de registro</h1>
-    <form method="post" autocomplete="off" novalidate>
+    <form method="post" autocomplete="off" novalidate enctype="multipart/form-data">
         {% csrf_token %}
 
         <!-- Campos Nombre y Apellidos en la misma fila -->
