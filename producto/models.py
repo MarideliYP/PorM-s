@@ -1,0 +1,164 @@
+import datetime
+from urllib import request
+
+from django.db import models
+from user.models import User
+
+
+class Contrato(models.Model):
+    archivo = models.FileField(upload_to='contratos/')
+    fecha_subida = models.DateTimeField(auto_now_add=True)
+    activo = models.BooleanField(default=True)  # Para tener solo uno activo
+
+    def __str__(self):
+        return f"Contrato subido el {self.fecha_subida.strftime('%d/%m/%Y')}"
+
+    class Meta:
+        verbose_name = "Contrato Oficial"
+        verbose_name_plural = "Contratos Oficiales"
+
+
+class ContratoFirmado(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    archivo = models.FileField(upload_to='contratos_firmados/')
+    fecha_subida = models.DateTimeField(auto_now_add=True)
+    estado = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Contrato firmado por {self.usuario}"
+
+
+class Producto(models.Model):
+    nombreP = models.CharField(max_length=255)
+    detalles = models.CharField(max_length=500)
+    image = models.ImageField(upload_to='productos/')
+    precio = models.DecimalField(max_digits=5, decimal_places=2)
+    tipos = (
+        ('turismo', 'Turismo'),
+        ('comidas-bebidas', 'Comidas y bebidas'),
+        ('articulo-hogar', 'Articulos del hogar'),
+        ('belleza', 'Belleza'),
+    )
+    tipo = models.CharField(max_length=21, choices=tipos)
+
+    def __str__(self) -> str:
+        return f'{self.nombreP}'
+
+
+class Inmueble(models.Model):
+    nombreI = models.CharField(max_length=255)
+    detalles = models.CharField(max_length=1000)
+    image = models.ImageField(upload_to='inmuebles/')
+    numagente = models.IntegerField(default=53957442)
+    precio = models.DecimalField(max_digits=10, decimal_places=2)
+    tipos = (
+        ('arroyo_naranjo', 'Arroyo Naranjo'),
+        ('boyeros', 'Boyeros'),
+        ('cerro', 'Cerro'),
+        ('cotorro', 'Cotorro'),
+        ('diez_de_octubre', 'Diez de Octubre'),
+        ('guanabacoa', 'Guanabacoa'),
+        ('habana_del_este', 'La Habana del Este'),
+        ('habana_vieja', 'La Habana Vieja'),
+        ('la Lisa', 'La Lisa'),
+        ('marianao', 'Marianao'),
+        ('playa', 'Playa'),
+        ('plaza', 'Plaza de la Revolución'),
+        ('regla', 'Regla'),
+        ('san_miguel_del_padron', 'San Miguel del Padrón'),
+    )
+    tipo = models.CharField(max_length=21, choices=tipos)
+
+    def __str__(self) -> str:
+        return f'{self.nombreI}'
+
+
+class Oferta(models.Model):
+    nombreO = models.CharField(max_length=255)
+    description = models.CharField(max_length=500)
+    image = models.ImageField(upload_to='ofertas/')
+    precio = models.DecimalField(max_digits=5, decimal_places=2)
+    tipos = (
+        ('marketimg', 'Marketing Digital'),
+        ('promocion', 'Promoción y Publicidad'),
+        ('carteles', 'Diseño de Carteles y Fotos'),
+        ('gestion', 'Gestión de Compra y Venta Inmobiliaria'),
+    )
+    tipo = models.CharField(max_length=15, choices=tipos)
+
+    def __str__(self) -> str:
+        return f'{self.nombreO}'
+
+
+class Evento(models.Model):
+    nombreE = models.CharField(max_length=255)
+    description = models.CharField(max_length=500)
+    image = models.ImageField(upload_to='eventos/')
+    capacidad = models.IntegerField(default=1)
+    fechahora = models.DateTimeField(default=datetime.datetime.now)
+    preciocover = models.DecimalField(max_digits=5, decimal_places=2)
+
+    def __str__(self) -> str:
+        return f'{self.nombreE}'
+
+
+class Reserva(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reserva")
+    evento = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name="reserva")
+    num_personas = models.IntegerField(default=1)
+    num_confirm = models.IntegerField(default=0)
+    estado = models.BooleanField(default=False)
+    mensaje = models.CharField(max_length=1000, null=True, blank=True)
+
+
+class CarroCompra(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="carritos")
+    fecha_pago = models.DateTimeField(null=True, blank=True)
+    fecha_envio = models.DateTimeField(null=True, blank=True)
+    enviado = models.BooleanField(default=False)
+    cerrado = models.BooleanField(default=False)
+    pagado = models.BooleanField(default=False)
+
+    def precio_total(self):
+        items = self.items.all()
+        suma = 0
+        for item in items:
+            if item.producto is not None:
+                suma += item.producto.precio * item.cantidad
+            elif item.oferta is not None:
+                suma += item.oferta.precio * item.cantidad
+        return suma
+
+    def __str__(self) -> str:
+        return f'{self.usuario}-{self.pk}'
+
+
+class ArticuloCarro(models.Model):
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name="items", null=True, blank=True)
+    oferta = models.ForeignKey(Oferta, on_delete=models.CASCADE, related_name="items", null=True, blank=True)
+    reserva = models.ForeignKey(Reserva, on_delete=models.CASCADE, related_name="items", null=True, blank=True)
+    carrito = models.ForeignKey(CarroCompra, on_delete=models.CASCADE, related_name="items")
+    cantidad = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        if self.producto is not None:
+            return f'{self.producto.nombreP}'
+        elif self.oferta is not None:
+            return f'{self.oferta.nombreO}'
+        else:
+            return f'{self.reserva.evento.nombreE}'
+
+
+class Valoracion(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="valoraciones")
+    evento = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name='valoraciones', null=True, blank=True)
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='valoraciones', null=True, blank=True)
+    inmueble = models.ForeignKey(Inmueble, on_delete=models.CASCADE, related_name='valoraciones', null=True, blank=True)
+    oferta = models.ForeignKey(Oferta, on_delete=models.CASCADE, related_name='valoraciones', null=True, blank=True)
+
+    valor = models.PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)])
+    comentario = models.TextField(max_length=1000, blank=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.usuario} - {self.valor}★"

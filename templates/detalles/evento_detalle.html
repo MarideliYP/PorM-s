@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load filters %}
+
+{% block content %}
+<div class="section-title" style="margin-top: 9em">
+    <h2 class="detallesH2">Detalles del evento</h2>
+    <br>
+</div>
+<div class="container my-5 mt-2">
+    <div class="row g-2 bg-dark rounded-3" >
+        <!-- Imagen -->
+        <div class="col-md-5 m-0 p-2">
+            <img src="{{ evento.image.url }}"
+                 class="img-fluid rounded shadow-sm w-100"
+                 alt="{{ evento.nombreE }}"
+                 style="height: 400px; object-fit: cover;">
+        </div>
+
+        <!-- Información -->
+        <div class="col-md-6 mt-4 ms-2 text-light">
+            <h1 class="mb-3">{{ evento.nombreE }}</h1>
+            <p class="fs-5">{{ evento.description }}</p>
+
+            <!-- Calificación -->
+            <div class="d-flex align-items-center mb-3">
+                <div class="me-2 fs-4 text-warning">
+                    {% with evento.valoraciones.all|stars_info as stars %}
+                        {% for i in ""|ljust:stars.full %}
+                            <i class="bi bi-star-fill"></i>
+                        {% endfor %}
+                        {% if stars.half %}<i class="bi bi-star-half"></i>{% endif %}
+                        {% for i in ""|ljust:stars.empty %}
+                            <i class="bi bi-star"></i>
+                        {% endfor %}
+                    {% endwith %}
+                </div>
+                <span class="text-light">
+                    {% with avg=evento.valoraciones.all|avg_rating total=evento.valoraciones.all.count %}
+                        {{ avg }} ★ ({{ total }} reseñas)
+                    {% endwith %}
+                </span>
+            </div>
+
+            <!-- Detalles -->
+            <ul class="list-unstyled">
+                <li><strong>Fecha:</strong> {{ evento.fechahora|date:"d/m/Y H:i" }}</li>
+                <li><strong>Capacidad:</strong> {{ evento.capacidad }} personas</li>
+                <li><strong>Cover:</strong> $ {{ evento.preciocover }}</li>
+            </ul>
+
+            <!-- Botón -->
+            <a href="{% url 'producto:addr' evento.pk %}" class="btn btn-danger btn-lg px-4 mb-3">
+                <i class="bi bi-ticket-detailed"></i> Reservar entrada
+            </a>
+        </div>
+    </div>
+
+    <!-- Sección de reseñas -->
+    <div class="mt-5 pt-4 border-top border-secondary">
+        <h3 class="mb-4">Comentarios</h3>
+
+        <!-- Formulario -->
+        {% if user.is_authenticated %}
+        <div class="card bg-dark text-light p-4 mb-4 shadow-sm">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label>¿Cómo fue tu experiencia?</label>
+                    <select name="valor" class="form-select" required>
+                        <option value="">Califica el evento</option>
+                        <option value="5">5 ⭐ - Increíble</option>
+                        <option value="4">4 ⭐ - Muy bueno</option>
+                        <option value="3">3 ⭐ - Estuvo bien</option>
+                        <option value="2">2 ⭐ - Podría mejorar</option>
+                        <option value="1">1 ⭐ - No repetiría</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label>Comparte tu opinión</label>
+                    <textarea name="comentario" class="form-control" rows="3" placeholder="¿Qué te gustó? ¿Qué cambiarías?"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Enviar comentario</button>
+            </form>
+        </div>
+        {% else %}
+        <p class="text-muted mb-4">
+            <a href="{% url 'user:login' %}" class="btn btn-info">Inicia sesión</a> para  comentar sobre el evento.
+        </p>
+        {% endif %}
+
+        <!-- Lista de reseñas -->
+        <div class="mt-4">
+            {% if valoraciones %}
+                {% for val in valoraciones %}
+                <div class="border-bottom border-secondary ps-3 mb-3 bg-light rounded-3 p-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">{{ val.usuario.username }}</h6>
+                        <small class="text-muted">{{ val.fecha|date:"d/m/Y" }}</small>
+                    </div>
+
+                    <!-- Estrellas -->
+                    <div class="text-warning">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= val.valor %}
+                                <i class="bi bi-star-fill"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- Comentario -->
+                    <p class="mb-0 mt-1">{{ val.comentario|default:"Sin comentario" }}</p>
+
+                    <!-- Botones: Editar y Eliminar (solo para el dueño) -->
+                    {% if user == val.usuario %}
+                    <div class="mt-2 d-flex gap-2 justify-content-end">
+                        <!-- Botón Editar -->
+                        <button type="button" class="btn btn-sm btn-outline-warning"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editarValoracionModal{{ val.pk }}">
+                            <i class="bi bi-pencil"></i> Editar
+                        </button>
+
+                        <!-- Botón Eliminar -->
+                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                data-bs-toggle="modal"
+                                data-bs-target="#eliminarValoracionModal{{ val.pk }}">
+                            <i class="bi bi-trash"></i> Eliminar
+                        </button>
+                    </div>
+
+                    <!-- Modal: Editar Valoración -->
+                    <div class="modal fade" id="editarValoracionModal{{ val.pk }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content bg-dark text-light">
+                                <div class="modal-header border-secondary">
+                                    <h5 class="modal-title">Editar valoración</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form method="post" action="{% url 'producto:editar_valoracion' val.pk %}">
+                                    {% csrf_token %}
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label>Calificación</label>
+                                            <select name="valor" class="form-select" required>
+                                                {% for i in "54321" %}
+                                                    <option value="{{ i }}" {% if i|add:"0" == val.valor %}selected{% endif %}>
+                                                        {% for j in ""|ljust:i %}⭐{% endfor %} ({{ i }})
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label>Comentario</label>
+                                            <textarea name="comentario" class="form-control" rows="3">{{ val.comentario }}</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer border-secondary">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-warning">Guardar cambios</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal: Eliminar Valoración -->
+                    <div class="modal fade" id="eliminarValoracionModal{{ val.pk }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content bg-dark text-light">
+                                <div class="modal-header border-secondary">
+                                    <h5 class="modal-title text-danger">Eliminar valoración</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    ¿Estás seguro de que deseas eliminar tu valoración para <strong>{{ inmueble.nombreI }}</strong>?
+                                </div>
+                                <div class="modal-footer border-secondary">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <a href="{% url 'producto:eliminar_valoracion' val.pk %}" class="btn btn-danger">Eliminar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">Sé el primero en comentar sobre este evento.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
