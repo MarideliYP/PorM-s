@@ -1,4 +1,4 @@
-from .models import Producto, Inmueble, Oferta, Evento, Reserva, ContratoFirmado
+from .models import Producto, Inmueble, Oferta, Evento, Reserva, Media, Empresa
 from django import forms
 
 
@@ -264,16 +264,6 @@ class Reserva_form(forms.ModelForm):
         })
     )
 
-    estado = forms.BooleanField(
-        label='Confirmada',
-        required=False,
-        initial=False,
-        widget=forms.CheckboxInput(attrs={
-            'class': 'form-check-input',
-            'style': 'margin-left: 0; transform: scale(1.3);'
-        })
-    )
-
     mensaje = forms.CharField(
         max_length=1000,
         required=False,
@@ -285,13 +275,23 @@ class Reserva_form(forms.ModelForm):
         })
     )
 
+    estado = forms.BooleanField(
+        label='Confirmada',
+        required=False,
+        initial=False,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input ms-2',
+            'style': 'margin-left: 0; transform: scale(1.3);'
+        })
+    )
+
     class Meta:
         model = Reserva
         fields = [
             'num_personas',
             'num_confirm',
-            'estado',
             'mensaje',
+            'estado',
         ]
 
     def __init__(self, *args, **kwargs):
@@ -302,3 +302,77 @@ class Reserva_form(forms.ModelForm):
                 'max_length': 'Asegúrese que este valor tenga cuando más %(limit_value)d caracteres (tiene %('
                               'show_value)d).',
             }
+
+
+class Empresa_form(forms.ModelForm):
+    nombre = forms.CharField(
+        max_length=120,
+        label='Nombre de la Empresa',
+        widget=forms.TextInput(attrs={'class': 'form-control mb-3'})
+    )
+
+    description = forms.CharField(
+        max_length=120,
+        label='Detalles de la Empresa',
+        widget=forms.TextInput(attrs={'class': 'form-control mb-3'})
+    )
+
+    image = forms.ImageField(
+        label='Imagen de la Empresa',
+        widget=forms.FileInput(attrs={'class': 'form-control mb-3'})
+    )
+
+    class Meta:
+        model = Empresa
+        fields = ['nombre', 'description', 'image']
+
+    def __init__(self, *args, **kwargs):
+        super(Empresa_form, self).__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.error_messages = {
+                'required': 'Por favor llene este campo',
+                'max_length': 'Asegúrese que este valor tenga cuando más %(limit_value)d caracteres (tiene %('
+                              'show_value)d).',
+            }
+
+
+class MediaForm(forms.ModelForm):
+
+    archivo = forms.FileField(
+        label='Imagen/Video',
+        widget=forms.FileInput(attrs={'class': 'form-control mb-3'})
+    )
+
+    orden = forms.IntegerField(
+        label='# de archivo',
+        max_value=10,
+        widget=forms.NumberInput(attrs={'class': 'form-control mb-3'})
+    )
+
+    tipo = forms.ChoiceField(
+        choices=[
+            (None, 'Seleccione el tipo de archivo'),
+            ('imagen', 'Imagen'),
+            ('video', 'Video'),
+        ],
+        widget=forms.Select(attrs={'class': 'form-control form-select bg-transparent border-0 '
+                                            'border-bottom rounded-0 border-light-subtle text-primary'})
+    )
+
+    class Meta:
+        model = Media
+        fields = ['archivo', 'orden', 'tipo']
+
+    def clean_archivo(self):
+        archivo = self.cleaned_data.get('archivo')
+        if not archivo:
+            raise forms.ValidationError("Este campo es obligatorio.")
+
+        ext = archivo.name.lower().split('.')[-1]
+        tipo = self.cleaned_data.get('tipo')
+
+        if tipo == 'imagen' and ext not in ['jpg', 'jpeg', 'png', 'gif']:
+            raise forms.ValidationError("Las imágenes deben ser JPG, PNG o GIF.")
+        if tipo == 'video' and ext not in ['mp4', 'mov', 'webm', 'avi']:
+            raise forms.ValidationError("Los videos deben ser MP4, MOV, AVI o WEBM.")
+        return archivo

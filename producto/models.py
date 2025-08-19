@@ -1,8 +1,14 @@
 import datetime
-from urllib import request
-
-from django.db import models
 from user.models import User
+from django.db import models
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
+
+
+class Empresa(models.Model):
+    nombre = models.CharField(max_length=255)
+    description = models.CharField(max_length=1000)
+    image = models.ImageField(upload_to='empresas/')
 
 
 class Contrato(models.Model):
@@ -28,6 +34,28 @@ class ContratoFirmado(models.Model):
         return f"Contrato firmado por {self.usuario}"
 
 
+class Media(models.Model):
+    TIPO_CHOICES = [
+        ('imagen', 'Imagen'),
+        ('video', 'Video'),
+    ]
+
+    # Relación genérica
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
+    archivo = models.FileField(upload_to='media/')
+    orden = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        ordering = ['orden', 'pk']
+
+    def __str__(self):
+        return f"{self.get_tipo_display()} - {self.content_object or 'Sin objeto'}"
+
+
 class Producto(models.Model):
     nombreP = models.CharField(max_length=255)
     detalles = models.CharField(max_length=500)
@@ -40,6 +68,7 @@ class Producto(models.Model):
         ('belleza', 'Belleza'),
     )
     tipo = models.CharField(max_length=21, choices=tipos)
+    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name="producto", null=True, blank=True)
 
     def __str__(self) -> str:
         return f'{self.nombreP}'
@@ -85,6 +114,7 @@ class Oferta(models.Model):
         ('gestion', 'Gestión de Compra y Venta Inmobiliaria'),
     )
     tipo = models.CharField(max_length=15, choices=tipos)
+    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name="oferta", null=True, blank=True)
 
     def __str__(self) -> str:
         return f'{self.nombreO}'
@@ -97,6 +127,7 @@ class Evento(models.Model):
     capacidad = models.IntegerField(default=1)
     fechahora = models.DateTimeField(default=datetime.datetime.now)
     preciocover = models.DecimalField(max_digits=5, decimal_places=2)
+    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name="evento", null=True, blank=True)
 
     def __str__(self) -> str:
         return f'{self.nombreE}'
@@ -107,17 +138,20 @@ class Reserva(models.Model):
     evento = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name="reserva")
     num_personas = models.IntegerField(default=1)
     num_confirm = models.IntegerField(default=0)
+    pagar = models.ImageField(upload_to='reservas/', null=True)
     estado = models.BooleanField(default=False)
     mensaje = models.CharField(max_length=1000, null=True, blank=True)
+
+    def get_total(self):
+        return self.evento.preciocover * self.num_personas
 
 
 class CarroCompra(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="carritos")
     fecha_pago = models.DateTimeField(null=True, blank=True)
     fecha_envio = models.DateTimeField(null=True, blank=True)
-    enviado = models.BooleanField(default=False)
-    cerrado = models.BooleanField(default=False)
     pagado = models.BooleanField(default=False)
+    cerrado = models.BooleanField(default=False)
 
     def precio_total(self):
         items = self.items.all()
@@ -155,6 +189,7 @@ class Valoracion(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='valoraciones', null=True, blank=True)
     inmueble = models.ForeignKey(Inmueble, on_delete=models.CASCADE, related_name='valoraciones', null=True, blank=True)
     oferta = models.ForeignKey(Oferta, on_delete=models.CASCADE, related_name='valoraciones', null=True, blank=True)
+    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name="valoraciones", null=True, blank=True)
 
     valor = models.PositiveSmallIntegerField(choices=[(i, i) for i in range(1, 6)])
     comentario = models.TextField(max_length=1000, blank=True)

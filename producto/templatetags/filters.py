@@ -58,18 +58,16 @@ INMUEBLE_TIPO_MAP = {key: f"filter-{key}" for key, label in TIPOS_INMUEBLES}
 
 @register.filter
 def get_filter_class(obj):
-    """
-    Devuelve la clase CSS para filtrado (Isotope) basado en el tipo del objeto.
-    Asume que el objeto tiene un atributo `tipo`.
-    """
     tipo = getattr(obj, 'tipo', None)
     if not tipo:
         return ""
 
-    # Detectar si es producto o inmueble por el valor de `tipo`
-    if tipo in PRODUCTO_TIPO_MAP:
-        return PRODUCTO_TIPO_MAP[tipo]
-    elif tipo in INMUEBLE_TIPO_MAP:
-        return INMUEBLE_TIPO_MAP[tipo]
+    # Normalizar: a minúsculas, reemplazar _ por -
+    tipo_clean = tipo.strip().lower().replace('_', '-')
+
+    if tipo_clean in PRODUCTO_TIPO_MAP:
+        return PRODUCTO_TIPO_MAP[tipo_clean]
+    elif tipo_clean in INMUEBLE_TIPO_MAP:
+        return INMUEBLE_TIPO_MAP[tipo_clean]
     else:
         return ""

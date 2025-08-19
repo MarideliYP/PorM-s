@@ -7,7 +7,8 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
-from producto.models import Reserva
+from producto.forms import Reserva_form
+from producto.models import Reserva, ContratoFirmado
 from .models import User
 from django.utils.decorators import method_decorator
 from django.http import HttpResponseRedirect
@@ -184,10 +185,12 @@ class User_details(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         usuario = self.get_object()
-
         # Obtener las reservas del usuario que se está viendo
         context['reservas'] = Reserva.objects.filter(usuario=usuario).select_related('evento')
-
+        context['contratos'] = ContratoFirmado.objects.filter(usuario=usuario)
+        context['reserva_forms'] = [
+            (reserva, Reserva_form(instance=reserva)) for reserva in context['reservas']
+        ]
         return context
 
 

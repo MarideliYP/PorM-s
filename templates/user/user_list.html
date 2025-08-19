@@ -18,12 +18,13 @@
     <div class="m-5 table-responsive">
         <!-- Vista para escritorio -->
         <div class="d-none d-md-block">
-            <table class="table table-dark table-hover align-middle">
+            <table class="table table-hover align-middle">
                 <thead>
                     <tr>
                         <th scope="col">Usuario</th>
                         <th scope="col">Nombre</th>
                         <th scope="col">Email</th>
+                        <th scope="col">Dirección</th>
                         <th scope="col">Acciones</th>
                     </tr>
                 </thead>
@@ -33,6 +34,7 @@
                             <td>{{ instance.username }}</td>
                             <td>{{ instance.first_name|capfirst }} {{ instance.last_name|capfirst }}</td>
                             <td>{{ instance.email }}</td>
+                            <td>{{ instance.dir }}</td>
                             <td class="text-center" style="width: 22em;">
                                 <!-- Botones de acción -->
                                 <button type="button" class="btn mt-2 mb-2 btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal{{ instance.pk }}">
@@ -83,6 +85,7 @@
                                 <h5 class="card-title fw-bold">{{ instance.username }}</h5>
                                 <p class="card-text"><strong>Nombre:</strong> {{ instance.first_name|capfirst }} {{ instance.last_name|capfirst }}</p>
                                 <p class="card-text"><strong>Email:</strong> {{ instance.email }}</p>
+                                <p class="card-text"><strong>Dirección:</strong> {{ instance.dir }}</p>
                                 <div class="d-grid gap-2">
                                     <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal{{ instance.pk }}">
                                         <i class="bi bi-trash"></i> Eliminar

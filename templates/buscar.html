@@ -23,7 +23,7 @@
         <div class="col-lg-3 col-md-4 col-sm-6 mb-3 menu-item-1">
             <div class="card h-100 shadow-sm text-white rounded-3 overflow-hidden" style="background: #000000;">
                 {% if inmueble.image %}
-                <img src="{{ inmueble.image.url }}" class="card-img-top special-img" alt="Inmueble {{ inmueble.nombreI }}" style="object-fit: cover; width: 300px; height: 300px;">
+                <img src="{{ inmueble.image.url }}" class="card-img-top special-img" alt="Inmueble {{ inmueble.nombreI }}" style="object-fit: cover; width: 350px; height: 300px;">
                 {% endif %}
                 <div class="card-body">
                     <h5 class="card-title">{{ inmueble.nombreI }}</h5>
@@ -64,7 +64,7 @@
         <div class="col-lg-3 col-md-4 col-sm-6 mb-3 menu-item">
             <div class="card h-100 shadow-sm text-white rounded-3 overflow-hidden" style="background: #2a2a3a;">
                 {% if oferta.image %}
-                <img src="{{ oferta.image.url }}" class="card-img-top special-img" alt="Oferta {{ oferta.nombreO }}" style="object-fit: cover; width: 300px; height: 300px;">
+                <img src="{{ oferta.image.url }}" class="card-img-top special-img" alt="Oferta {{ oferta.nombreO }}" style="object-fit: cover; width: 350px; height: 300px;">
                 {% endif %}
                 <div class="card-body">
                     <h5 class="card-title">{{ oferta.nombreO }}</h5>
@@ -102,7 +102,7 @@
         <div class="col-lg-3 col-md-4 col-sm-6 mb-3 menu-item">
             <div class="card h-100 shadow-sm text-white rounded-3 overflow-hidden" style="background: #1e1e1e">
                 <div class="text-center">
-                    <img src="{{ producto.image.url }}" class="card-img-top special-img" alt="Imagen de {{ producto.nombreP }}" style="object-fit: cover; width: 300px; height: 300px;">
+                    <img src="{{ producto.image.url }}" class="card-img-top special-img" alt="Imagen de {{ producto.nombreP }}" style="object-fit: cover; width: 350px; height: 300px;">
                 </div>
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title text-start mb-2">{{ producto.nombreP }}</h5>
@@ -140,7 +140,7 @@
         <div class="col-lg-3 col-md-4 col-sm-6 mb-3 menu-item-1">
             <div class="card h-100 shadow-sm text-white rounded-3 overflow-hidden" style="background: #2b3035;">
                 {% if evento.image %}
-                <img src="{{ evento.image.url }}" class="card-img-top special-img" alt="Evento {{ evento.nombreE }}" style="object-fit: cover; width: 300px; height: 300px;">
+                <img src="{{ evento.image.url }}" class="card-img-top special-img" alt="Evento {{ evento.nombreE }}" style="object-fit: cover; width: 350px; height: 300px;">
                 {% endif %}
                 <div class="card-body">
                     <h5 class="card-title">{{ evento.nombreE }}</h5>
@@ -171,8 +171,11 @@
 
     <!-- Mensaje si no hay resultados -->
     {% if termino and not productos and not ofertas and not eventos and not inmuebles %}
-    <div class="text-center my-5">
-        <p>No se encontraron resultados para "<strong>{{ termino }}</strong>".</p>
+    <div class="text-center my-5 min-vh-100">
+        <h1>No se encontraron resultados para "<strong>{{ termino }}</strong>".</h1>
+        <a class="btn btn-outline-dark btn-sm px-4" href="{% url 'index' %}">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+        </a>
     </div>
     {% endif %}
 </div>

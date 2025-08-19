@@ -66,6 +66,19 @@ class User_form(forms.ModelForm):
         max_length=30,
     )
 
+    dir = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                'name': 'dir',
+                'class': 'form-control mb-3',
+                'placeholder': 'Dirección',
+
+            }
+        ),
+        label="Dirección",
+        validators=[not_empty]
+    )
+
     password = forms.CharField(
         widget=forms.PasswordInput(
             attrs={
@@ -98,6 +111,7 @@ class User_form(forms.ModelForm):
             'email',
             'first_name',
             'last_name',
+            'dir',
             'password',
             'check_pass',
         ]

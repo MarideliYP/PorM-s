@@ -9,6 +9,7 @@ class User(AbstractUser):
     code_expiration = models.DateTimeField(blank=True, null=True)
     failed_attempts = models.PositiveIntegerField(default=0)
     code_blocked_until = models.DateTimeField(blank=True, null=True)
+    dir = models.CharField(default='Provincia, Municipio, calle/calles no.', max_length=200)
     image = models.ImageField(upload_to='img/', default='img/user.png')
 
     def is_code_valid(self, entered_code):

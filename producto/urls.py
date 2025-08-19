@@ -1,15 +1,17 @@
 from django.urls import path
-from .views import Producto_add, Producto_delete, Producto_update, Inmueble_add, Inmueble_delete, Inmueble_update,\
-    Oferta_add,  Oferta_delete, Oferta_update, Evento_add,  Evento_delete, Evento_update, Reserva_add,\
+from .views import Producto_add, Producto_delete, Producto_update, Inmueble_add, Inmueble_delete, Inmueble_update, \
+    Oferta_delete, Oferta_update, Evento_add, Evento_delete, Evento_update, Reserva_add, \
     editar_reserva, eliminar_reserva, add_producto_carrito, add_oferta_carrito, ajustar_carrito_item, \
-    eliminar_carrito_item, enviar_carrito, GestionarContratoView, SubirContratoFirmadoView, SubirContratoAdminView, \
-    pedir_cuenta, buscar, evento_detalle, inmueble_detalle, producto_detalle, oferta_detalle, eliminar_valoracion, \
-    editar_valoracion, crear_valoracion
+    eliminar_carrito_item, pagar_carrito, GestionarContratoView, SubirContratoFirmadoView, SubirContratoAdminView, \
+    pedir_cuenta, buscar, evento_detalle, inmueble_detalle, producto_detalle, oferta_detalle, empresa_detalle, \
+    eliminar_valoracion, editar_valoracion, crear_valoracion, ContratoFirmadoUpdate, contrato_firmado_delete, \
+    Empresa_delete, Empresa_add, agregar_media, oferta_add
 
 app_name = 'producto'
 
 urlpatterns = [
     path('buscar/', buscar, name='buscar'),
+    path('media/agregar/<str:content_type_str>/<int:pk>/', agregar_media, name='agregar_media'),
     path('inmueble/<int:pk>/valoracion/', crear_valoracion, name='crear_valoracion'),
     path('valoracion/<int:pk>/editarv/', editar_valoracion, name='editar_valoracion'),
     path('valoracion/<int:pk>/eliminarv/', eliminar_valoracion, name='eliminar_valoracion'),
@@ -17,17 +19,24 @@ urlpatterns = [
     path('addp/', Producto_add.as_view(), name='addp'),
     path('<int:pk>/deletep/', Producto_delete.as_view(), name='deletep'),
     path('<int:pk>/updatep/', Producto_update.as_view(), name='updatep'),
+    path('<int:pk>/deletec/', contrato_firmado_delete, name='deletec'),
     path('gestionar-contrato/', GestionarContratoView.as_view(), name='gestionar_contrato'),
     path('subir-contrato-admin/', SubirContratoAdminView.as_view(), name='subir_contrato_admin'),
     path('subir-contrato-firmado/', SubirContratoFirmadoView.as_view(), name='subir_contrato_firmado'),
+    path('actualizar-contrato-firmado/<int:pk>/editarc/', ContratoFirmadoUpdate.as_view(), name='editarc'),
 
     path('addi/', Inmueble_add.as_view(), name='addi'),
     path('<int:pk>/deletei/', Inmueble_delete.as_view(), name='deletei'),
     path('<int:pk>/updatei/', Inmueble_update.as_view(), name='updatei'),
 
-    path('addo/', Oferta_add.as_view(), name='addo'),
+    path('addo/', oferta_add, {'empresa_pk': None}, name='addo'),
+    path('addo/<int:empresa_pk>/', oferta_add, name='addo-empresa'),
     path('<int:pk>/deleteo/', Oferta_delete.as_view(), name='deleteo'),
     path('<int:pk>/updateo/', Oferta_update.as_view(), name='updateo'),
+
+    path('empresa/<int:pk>/', empresa_detalle, name='empresa_detalle'),
+    path('<int:pk>/deleteem/', Empresa_delete.as_view(), name='deleteem'),
+    path('addem/', Empresa_add.as_view(), name='addem'),
 
     path('adde/', Evento_add.as_view(), name='adde'),
     path('addr/<int:pk>/', Reserva_add.as_view(), name='addr'),
@@ -46,7 +55,7 @@ urlpatterns = [
     path('carrito_item/<int:pk>/eliminar/', eliminar_carrito_item, name='eliminar-carrito-item'),
     path('carrito_item/<int:pk>/addp/', add_producto_carrito, name='add_producto_carrito'),
     path('carrito_item/<int:pk>/addo/', add_oferta_carrito, name='add_oferta_carrito'),
-    path('carrito_item/enviar_carrito/', enviar_carrito, name='enviar-carrito'),
+    path('carrito_item/enviar_carrito/', pagar_carrito, name='enviar-carrito'),
     path('carrito_item/pedir_cuenta/', pedir_cuenta, name='pedir-cuenta'),
 ]
 
