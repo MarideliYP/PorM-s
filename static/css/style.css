@@ -41,7 +41,7 @@ body {
     width: 40px;
     height: 40px;
     cursor: pointer;
-    margin-right: -58%;
+    margin-right: -54%;
     z-index: 2000;
     background-image: url('../svg/bars.svg');
     background-position: center;

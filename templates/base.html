@@ -16,16 +16,27 @@
 <body>
 
     <div id="root" class="root_welcome">
+        <!-- ✅ Mensajes globales: mejor aquí -->
+        <div id="messages-container">
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}
+                        alert-dismissible fade show"
+                 style="position: fixed; top: 20px; right: 20px; z-index: 10000; max-width: 300px;"
+                 role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+        </div>
 
-        {% include 'nav.html' %}
-
-{#        <main class="root__section m-0 p-0">#}
+        {% include 'index/nav.html' %}
             {% block content %}
-            <!-- Aquí irá el contenido de las páginas -->
-            {% endblock %}
-{#        </main>#}
 
-        {% include 'footer.html' %}
+            {% endblock %}
+
+        {% include 'index/footer.html' %}
 
     </div>
 
@@ -34,6 +45,15 @@
     <script src="{% static 'bootstrap-5.3.2-dist/js/bootstrap.bundle.js' %}"></script>
     <script src="{% static 'js/app.js' %}" type="text/javascript"></script>
     <script src="{% static 'js/carrito-res.js' %}" type="text/javascript"></script>
-
+    <script>
+        // Auto-close messages after 5 seconds
+        document.addEventListener("DOMContentLoaded", function () {
+          setTimeout(function () {
+            document.querySelectorAll('.alert').forEach(function (el) {
+              if (el.parentElement) el.parentElement.removeChild(el);
+            });
+          }, 5000);
+        });
+    </script>
 </body>
 </html>

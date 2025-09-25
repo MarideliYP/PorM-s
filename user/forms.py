@@ -71,7 +71,7 @@ class User_form(forms.ModelForm):
             attrs={
                 'name': 'dir',
                 'class': 'form-control mb-3',
-                'placeholder': 'Dirección',
+                'placeholder': 'Provincia, Municipio, calle/calles no.',
 
             }
         ),
@@ -169,7 +169,7 @@ class User_form(forms.ModelForm):
         if commit:
             user.save()
             if is_new:
-                group = Group.objects.get(name="Usuario")
+                group = Group.objects.get(name="Cliente")
                 group.user_set.add(user)
         return user
 

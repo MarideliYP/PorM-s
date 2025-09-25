@@ -210,7 +210,14 @@ class Evento_form(forms.ModelForm):
 
     fechahora = forms.DateTimeField(
         label='Fecha y hora',
-        widget=forms.DateTimeInput(attrs={'class': 'form-control mb-3'})
+        widget=forms.DateTimeInput(
+            attrs={
+                'class': 'form-control mb-3',
+                'type': 'datetime-local'
+            },
+            format='%Y-%m-%dT%H:%M'
+        ),
+        input_formats=['%Y-%m-%dT%H:%M']
     )
 
     preciocover = forms.FloatField(

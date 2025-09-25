@@ -1,5 +1,4 @@
 import os
-
 from django.utils import timezone
 import datetime
 from django.contrib import auth
@@ -8,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
 from producto.forms import Reserva_form
-from producto.models import Reserva, ContratoFirmado
+from producto.models import Reserva, ContratoFirmado, CarroCompra
 from .models import User
 from django.utils.decorators import method_decorator
 from django.http import HttpResponseRedirect
@@ -24,7 +23,6 @@ from .forms import VerificationCodeForm
 from django.views.generic import (
     CreateView,
     ListView,
-    UpdateView,
     DetailView,
 )
 
@@ -49,34 +47,58 @@ class Register(CreateView):
     template_name = 'user/register.html'
     form_class = User_form
 
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Ocultar el campo 'grupo' si el usuario no es admin
+        if not (self.request.user.is_authenticated and self.request.user.is_staff):
+            form.fields.pop('grupo', None)
+        return form
+
     def form_valid(self, form):
         email = form.cleaned_data.get('email')
+        es_admin = self.request.user.is_authenticated and self.request.user.is_staff
 
-        # Si ya existe un usuario con ese correo
-        if User.objects.filter(email=email).exists():
+        # === FLUJO PARA USUARIOS NORMALES: verificar si el correo ya existe ===
+        if not es_admin and User.objects.filter(email=email).exists():
             existing_user = User.objects.get(email=email)
 
-            # Si el usuario actual está logueado y es el mismo dueño del correo
+            # Si el usuario ya logueado es el dueño del correo, redirigir
             if self.request.user.is_authenticated and self.request.user == existing_user:
-                # Autenticar y redirigir directamente
                 login(self.request, existing_user)
                 return redirect('PrMas:vistaempresa' if existing_user.groups.filter(name="Empresa").exists()
                                 else 'PrMas:index')
 
-            # Si NO está logueado o no es el dueño, enviar aviso al dueño
+            # Enviar aviso al dueño del correo
             subject = 'Alguien intentó usar tu correo'
-            message = f'Un intento de registro fue realizado con tu correo {email}. ' \
-                      f'Si no fuiste tú, por favor toma medidas.'
-            email_from = settings.EMAIL_HOST_USER
-            recipient_list = [existing_user.email]
+            message = f'Se intentó registrar un nuevo usuario con tu correo {email}. Si no fuiste tú, ten cuidado.'
+            send_mail(subject, message, settings.EMAIL_HOST_USER, [existing_user.email], fail_silently=True)
 
-            send_mail(subject, message, email_from, recipient_list, fail_silently=True)
-
-            # Mostrar error en el formulario
             form.add_error('email', 'Ya existe un usuario con este correo electrónico.')
             return self.form_invalid(form)
 
-        # Si el correo es nuevo, registrar normalmente
+        # === FLUJO PARA ADMIN: crear usuario directamente ===
+        if es_admin:
+            user = form.save(commit=False)
+            user.is_verified = True  # Verificado automáticamente
+            user.verification_code = None
+            user.code_expiration = None
+            user.save()
+
+            # Asignar grupo si se seleccionó
+            grupo = form.cleaned_data.get('grupo')
+            if grupo:
+                user.groups.add(grupo)
+
+                # Si el grupo es "Administrador", dar permisos especiales
+                if grupo.name == "Administrador":
+                    user.is_staff = True
+                    user.is_superuser = True
+                    user.save()
+
+            messages.success(self.request, f'✅ Usuario "{user.username}" creado exitosamente.')
+            return redirect('user:list')  # Cambia por tu URL de lista
+
+        # === FLUJO PARA USUARIO NORMAL: registro con verificación ===
         user = form.save(commit=False)
         user.is_verified = False
         code = generate_verification_code()
@@ -87,15 +109,14 @@ class Register(CreateView):
         # Enviar código de verificación
         subject = 'Código de verificación'
         message = f'Tu código de verificación es: {code}'
-        recipient_list = [user.email]
-        send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list, fail_silently=False)
+        send_mail(subject, message, settings.EMAIL_HOST_USER, [user.email], fail_silently=False)
 
+        messages.info(self.request, 'Revisa tu correo para verificar tu cuenta.')
         return redirect('user:verify_email', username=user.username)
 
     def form_invalid(self, form):
         return render(self.request, self.template_name, {
             'form': form,
-            'email_already_exists': True
         })
 
 
@@ -185,7 +206,7 @@ class User_details(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         usuario = self.get_object()
-        # Obtener las reservas del usuario que se está viendo
+
         context['reservas'] = Reserva.objects.filter(usuario=usuario).select_related('evento')
         context['contratos'] = ContratoFirmado.objects.filter(usuario=usuario)
         context['reserva_forms'] = [
@@ -204,8 +225,21 @@ def user_delete(request, pk):
 
 @method_decorator(login_required, name='dispatch')
 class User_list(ListView):
-    queryset = User.objects.all()
+    model = User
     template_name = 'user/user_list.html'
+    context_object_name = 'object_list'
+
+    def get_queryset(self):
+        return User.objects.all().prefetch_related('carritos')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Añadir carritos con pago (con imagen en `pagar`)
+        context['carritos_con_pago'] = CarroCompra.objects.filter(
+            pagar__isnull=False,
+            pagado=False  # Solo los que aún no están marcados como pagados
+        ).select_related('usuario').prefetch_related('items')
+        return context
 
 
 @login_required
@@ -283,4 +317,3 @@ def update_img(request, pk):
             messages.warning(request, "⚠️ No seleccionaste ninguna imagen.")
 
     return redirect("user:details", pk=pk)
-

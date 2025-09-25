@@ -1,7 +1,7 @@
 {% load static %}
 
-<section id="events" class="events" style="min-height: 35em">
-  <div class="container aos-init aos-animate" data-aos="fade-up">
+<section id="events" class="events" style="min-height: 40em">
+  <div class="container" data-aos="fade-up">
 
     <!-- Botón para administradores -->
     {% if user.is_staff %}
@@ -21,15 +21,16 @@
 
     <!-- Contenedor de eventos -->
     <div id="event-grid" class="row g-4 justify-content-center">
-      <!-- Los eventos se inyectan aquí con JavaScript -->
+      <!-- Aquí se mostrarán los eventos o el mensaje de "no hay eventos" -->
     </div>
 
     <!-- Paginación -->
     <div class="d-flex justify-content-center mt-4">
       <div id="pagination" class="btn-group" role="group" aria-label="Navegación de eventos">
-        <!-- Botones generados por JS -->
+        <!-- Botones generados por JavaScript -->
       </div>
     </div>
+
   </div>
 </section>
 
@@ -39,42 +40,61 @@
   $(document).ready(function () {
     // Generar URL base para detalles
     const baseDetalleUrl = "{% url 'producto:evento_detalle' 0 %}";
-    const baseUrl = baseDetalleUrl.replace('/0/', '/'); // "/producto/evento/"
+    const baseUrl = baseDetalleUrl.replace('/0/', '/'); // Ej: "/producto/evento/"
 
+    // ✅ Verificar si hay eventos usando Django
+    const hayEventos = {% if eventos %}true{% else %}false{% endif %};
+
+    if (!hayEventos) {
+      // Mostrar mensaje si no hay eventos
+      $('#event-grid').html(`
+        <div class="text-center my-5">
+          <i class="bi bi-calendar-event text text-light" style="font-size: 3rem;"></i>
+          <p class="mt-3 fs-5 text-light">No hay eventos registrados por el momento.</p>
+        </div>
+      `);
+      $('#pagination').hide(); // Ocultar paginación
+      return;
+    }
+
+    // ✅ Si hay eventos, construir el array
     const eventos = [
       {% for evento in eventos %}
-        {
-          nombreE: "{{ evento.nombreE }}",
-          preciocover: "{{ evento.preciocover }}",
-          capacidad: "{{ evento.capacidad }}",
-          description: "{{ evento.description|escape|truncatechars:80 }}",
-          image: "{{ evento.image.url }}",
-          pk: {{ evento.pk }},
-          btns: `
-            <!-- Botón de reserva: para cualquier usuario autenticado -->
-            {% if user.is_authenticated %}
-              <a class="btn btn-primary d-inline-block position-relative" href="{% url 'producto:addr' evento.pk %}">
-                <i class="bi bi-plus"></i> Reservar
-              </a>
-            {% endif %}
+        {% if not evento.empresa %}
+            {
+              nombreE: "{{ evento.nombreE|escapejs }}",
+              preciocover: "{{ evento.preciocover }}",
+              capacidad: "{{ evento.capacidad }}",
+              description: "{{ evento.description|escape|truncatechars:80|escapejs }}",
+              image: "{{ evento.image.url }}",
+              pk: {{ evento.pk }},
+              btns: `
+                <!-- Botón de reserva: para usuarios autenticados -->
+                {% if user.is_authenticated %}
+                  <a class="btn btn-primary d-inline-block position-relative" href="{% url 'producto:addr' evento.pk %}">
+                    <i class="bi bi-plus"></i> Reservar
+                  </a>
+                {% endif %}
 
-            <!-- Botones de edición/eliminación: solo para staff o administradores -->
-            {% if user.is_staff or is_Administrador %}
-              <a href="{% url 'producto:updatee' evento.pk %}" class="btn-menu m-2">
-                <img src="{% static 'img/editar.png' %}" alt="Editar">
-              </a>
-              <a href="{% url 'producto:deletee' evento.pk %}" class="btn-menu m-2">
-                <img src="{% static 'img/eliminar.png' %}" alt="Eliminar">
-              </a>
-            {% endif %}
-          `
-        },
+                <!-- Botones de edición/eliminación: solo para staff o administradores -->
+                {% if user.is_staff or is_Administrador %}
+                  <a href="{% url 'producto:updatee' evento.pk %}" class="btn-menu m-2">
+                    <img src="{% static 'img/editar.png' %}" alt="Editar" style="width: 24px; height: 24px;">
+                  </a>
+                  <a href="{% url 'producto:deletee' evento.pk %}" class="btn-menu m-2">
+                    <img src="{% static 'img/eliminar.png' %}" alt="Eliminar" style="width: 24px; height: 24px;">
+                  </a>
+                {% endif %}
+              `
+            },
+        {% endif %}
       {% endfor %}
     ];
 
     const eventosPorPagina = 6;
     let paginaActual = 0;
 
+    // Función para renderizar eventos de la página actual
     function renderizarEventos(pagina) {
       const start = pagina * eventosPorPagina;
       const end = start + eventosPorPagina;
@@ -114,6 +134,7 @@
       });
     }
 
+    // Función para generar botones de paginación
     function generarPaginacion() {
       const totalEventos = eventos.length;
       const totalPages = Math.ceil(totalEventos / eventosPorPagina);
@@ -130,14 +151,14 @@
       }
     }
 
-    // Manejar clic en paginación
+    // Manejar clic en botones de paginación
     $(document).on("click", "#pagination .btn", function () {
       paginaActual = parseInt($(this).data("page"));
       renderizarEventos(paginaActual);
       generarPaginacion();
     });
 
-    // Renderizar primera página
+    // Renderizar la primera página al cargar
     renderizarEventos(paginaActual);
     generarPaginacion();
   });

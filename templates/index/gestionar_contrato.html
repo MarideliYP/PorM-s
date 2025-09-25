@@ -2,7 +2,7 @@
 {% load static %}
 {% block content %}
     <div class="form-container p-3">
-        <h1>📄 Gestionar Contrato</h1>
+        <h1>📄 Gestionar contrato de {{ tipo }}</h1>
         <p>Sigue estos pasos para completar tu proceso contractual:</p>
         <div class="bg-dark rounded-3 p-2">
             <div class="step">
@@ -61,7 +61,7 @@
                         <h1 class="modal-title fs-5" id="subirFirmadoModalLabel">Subir Contrato Firmado</h1>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                        <form method="POST" id="archivo-firmado-form" action="{% url 'producto:subir_contrato_firmado' %}" enctype="multipart/form-data">
+                        <form method="POST" id="archivo-firmado-form" action="{% url 'producto:subir_contrato_firmado' tipo %}" enctype="multipart/form-data">
                             {% csrf_token %}
 
                     <div class="modal-body">
@@ -89,7 +89,7 @@
                         <h1 class="modal-title fs-5" id="subirNuevoModalLabel">Subir Nuevo Contrato Oficial</h1>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form method="post" action="{% url 'producto:subir_contrato_admin' %}" enctype="multipart/form-data">
+                    <form method="post" action="{% url 'producto:subir_contrato_admin' tipo %}" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="modal-body">
                             <div class="mb-3">

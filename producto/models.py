@@ -11,27 +11,31 @@ class Empresa(models.Model):
     image = models.ImageField(upload_to='empresas/')
 
 
+TIPO_CONTRATO_CHOICES = [
+    ('empresa', 'Contrato de Empresa'),
+    ('inmueble', 'Contrato de Inmueble'),
+]
+
+
 class Contrato(models.Model):
     archivo = models.FileField(upload_to='contratos/')
+    activo = models.BooleanField(default=False)
+    tipo = models.CharField(max_length=20, choices=TIPO_CONTRATO_CHOICES)
     fecha_subida = models.DateTimeField(auto_now_add=True)
-    activo = models.BooleanField(default=True)  # Para tener solo uno activo
 
     def __str__(self):
-        return f"Contrato subido el {self.fecha_subida.strftime('%d/%m/%Y')}"
-
-    class Meta:
-        verbose_name = "Contrato Oficial"
-        verbose_name_plural = "Contratos Oficiales"
+        return f"{self.get_tipo_display()} (activo: {self.activo})"
 
 
 class ContratoFirmado(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     archivo = models.FileField(upload_to='contratos_firmados/')
+    tipo = models.CharField(max_length=20, choices=TIPO_CONTRATO_CHOICES)
+    estado = models.CharField(max_length=20, default='pendiente')  # pendiente, confirmado
     fecha_subida = models.DateTimeField(auto_now_add=True)
-    estado = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Contrato firmado por {self.usuario}"
+        return f"Contrato firmado por {self.usuario} - {self.get_tipo_display()}"
 
 
 class Media(models.Model):
@@ -148,6 +152,7 @@ class Reserva(models.Model):
 
 class CarroCompra(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="carritos")
+    pagar = models.ImageField(upload_to='carrosCompra/', null=True)
     fecha_pago = models.DateTimeField(null=True, blank=True)
     fecha_envio = models.DateTimeField(null=True, blank=True)
     pagado = models.BooleanField(default=False)

@@ -64,7 +64,15 @@
                 </div>
             {% endif %}
         {% endfor %}
-
+        {% if user.is_staff or is_Administrador %}
+            <label for="roles">Rol:</label>
+            <select class="form-select mb-4" name="roles" id="roles">
+                <option value="Cliente">Cliente</option>
+                <option value="Empresa">Empresa</option>
+                <option value="Repartidor">Repartidor</option>
+                <option value="Administrador">Administrador</option>
+            </select>
+        {% endif %}
         <!-- Enlace a login -->
         <p class="mt-3 text-center text-white-50">
             ¿Ya tienes cuenta?

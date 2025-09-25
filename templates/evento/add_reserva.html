@@ -11,7 +11,7 @@
 {% block content %}
 <section id="contact" class="contact">
   <div class="form-container">
-    <h1>Añadir Reserva al Evento</h1>
+    <h1>Añadir Reserva para {{ evento.nombreE }}</h1>
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
 
