@@ -1,0 +1,17 @@
+{% extends 'base2.html' %}
+{% load static %}
+
+{% block content %}
+<div class="form-container mt-5">
+    <h2>Añadir Media a {{ obj.nombre }}</h2>
+
+    <form method="post" enctype="multipart/form-data" class="d-flex flex-column">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-success">Guardar Media</button>
+            <a href="{{ request.META.HTTP_REFERER }}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
