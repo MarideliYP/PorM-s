@@ -1,6 +1,6 @@
 Django==5.0.6
 Pillow==11.3.0
 openpyxl==3.1.5
-python-decouple==3.8
+decouple==3.8
 gunicorn==21.2.0
 dj-database-url==2.2.0
