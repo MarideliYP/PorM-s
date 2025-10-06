@@ -1,25 +1,25 @@
 import os
 from pathlib import Path
+from decouple import config
 import dj_database_url
 from django.urls import reverse_lazy
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# =============================================================================
+# === SEGURIDAD Y ENTORNO ===
+# =============================================================================
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+SECRET_KEY = config('SECRET_KEY')  # ¡Obligatorio! Debe estar en Railway como variable de entorno
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-b2p^jpr$j0^ff4nra&-ch@p$m*i=63&!5eqfg5irppz(z@-7pv"
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='.railway.app').split(',')
 
-ALLOWED_HOSTS = []
-
-
-# Application definition
+# =============================================================================
+# === APLICACIONES ===
+# =============================================================================
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -29,7 +29,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "user",
-    "producto"
+    "producto",
 ]
 
 MIDDLEWARE = [
@@ -47,14 +47,14 @@ ROOT_URLCONF = "PrMas.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / 'templates']
-        ,
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.media",
             ],
         },
     },
@@ -64,66 +64,104 @@ WSGI_APPLICATION = "PrMas.wsgi.application"
 
 AUTH_USER_MODEL = 'user.User'
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# =============================================================================
+# === BASE DE DATOS ===
+# =============================================================================
 
 DATABASES = {
-    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+    'default': dj_database_url.config(
+        default=config('DATABASE_URL', default='sqlite:///db.sqlite3')
+    )
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
+# =============================================================================
+# === CONTRASEÑAS ===
+# =============================================================================
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 8}},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
+# =============================================================================
+# === INTERNACIONALIZACIÓN ===
+# =============================================================================
 
 LANGUAGE_CODE = "es-es"
-
-TIME_ZONE = "UTC"
-
+TIME_ZONE = "America/Havana"
 USE_I18N = True
-
 USE_TZ = True
 
+# =============================================================================
+# === ARCHIVOS ESTÁTICOS Y DE MEDIOS ===
+# =============================================================================
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# =============================================================================
+# === LOGIN / REDIRECCIONES ===
+# =============================================================================
+
 LOGIN_URL = reverse_lazy('user:login')
+LOGIN_REDIRECT_URL = reverse_lazy('index')
+LOGOUT_REDIRECT_URL = reverse_lazy('index')
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+# =============================================================================
+# === CORREO ===
+# =============================================================================
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'myaburperez@gmail.com'
-EMAIL_HOST_PASSWORD = 'bzph xsms wzix gviy'
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+
+# =============================================================================
+# === SEGURIDAD EN PRODUCCIÓN ===
+# =============================================================================
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = "DENY"
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+
+# =============================================================================
+# === ERRORES Y ADMINISTRADORES ===
+# =============================================================================
+
+ADMINS = [("Marideli", config('ADMIN_EMAIL', default='myaburperez@gmail.com'))]
+MANAGERS = ADMINS
+SERVER_EMAIL = config('SERVER_EMAIL', default='error@pormas.com')
+
+# =============================================================================
+# === LÍMITES DE SEGURIDAD ===
+# =============================================================================
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880      # 5 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880      # 5 MB
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
+
+# =============================================================================
+# === OTROS ===
+# =============================================================================
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Usa el puerto asignado por Railway
 port = int(os.environ.get("PORT", 8000))
