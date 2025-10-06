@@ -128,3 +128,5 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'myaburperez@gmail.com'
 EMAIL_HOST_PASSWORD = 'bzph xsms wzix gviy'
 
+# Usa el puerto asignado por Railway
+port = int(os.environ.get("PORT", 8000))
