@@ -17,7 +17,7 @@ if not SECRET_KEY:
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '.railway.app').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
 # =============================================================================
 # === APLICACIONES ===
@@ -175,4 +175,5 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
 # =============================================================================
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
 
