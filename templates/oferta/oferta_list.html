@@ -1,0 +1,134 @@
+{% load static %}
+<!-- ======= Specials Section ======= -->
+<section id="specials" class="specials" style="min-height: 40em">
+  <div class="container aos-init aos-animate" data-aos="fade-up">
+
+    {% if user.is_staff %}
+      <div class="section-title">
+        <h2>Administrar ofertas</h2>
+        <br>
+        <a href="{% url 'producto:addo' %}" class="book-a-table-btn nav-link d-lg-flex" style="position: absolute;">Añadir nueva Oferta</a>
+      </div>
+    {% endif %}
+
+    <div class='section-title mt-5 text-center'>
+      <p>Ofertas</p>
+    </div>
+
+    <!-- Contenedor responsive -->
+    <div class="row justify-content-center">
+
+      <!-- Tabs solo en desktop -->
+      <div class="col-lg-3 d-none d-md-block">
+        <ul class="nav nav-tabs flex-column" role="tablist">
+          {% for oferta in ofertas %}
+              {% if not oferta.empresa %}
+                <li class="nav-item" role="presentation">
+                  <a class="nav-link {% if forloop.counter == 1 %} active show {% endif %}"
+                     data-bs-toggle="tab"
+                     href="#tab-{{ forloop.counter }}"
+                     {% if forloop.counter == 1 %}
+                         aria-selected="true"
+                     {% else %}
+                         aria-selected="false"
+                         tabindex="-1"
+                     {% endif %}
+                     role="tab">
+                    Oferta #{{ forloop.counter }}
+                  </a>
+                </li>
+              {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- Contenido dinámico -->
+      <div class="col-lg-9 col-12 mt-4 mt-lg-0">
+
+        <!-- Tabs Content -->
+        <div class="tab-content position-relative">
+
+          {% for oferta in ofertas %}
+              {% if not oferta.empresa %}
+                <div class="tab-pane fade{% if forloop.counter == 1 %} show active{% endif %}" id="tab-{{ forloop.counter }}" role="tabpanel">
+                  <div class="row align-items-center">
+                    <div class="col-md-7 col-12 details order-md-2 order-2 order-lg-1">
+                      <h3>{{ oferta.nombreO }}</h3>
+                      <p>{{ oferta.description }}</p>
+                      <p class="fst-italic"> ${{ oferta.precio }} </p>
+
+                        <div class="d-flex justify-content-center">
+                            {% if user.is_authenticated %}
+                              <a href="{% url 'producto:add_oferta_carrito' oferta.pk %}" class="btn-menu m-5"><img src="{% static 'img/añadir.png' %}" alt=""></a>
+                            {% endif %}
+                                {% if user.is_staff or is_Administrador %}
+                              <a href="{% url 'producto:deleteo' oferta.pk %}" class="btn-menu m-5"><img src="{% static 'img/eliminar.png' %}" alt=""></a>
+                              <a href="{% url 'producto:updateo' oferta.pk %}" class="btn-menu m-5"><img src="{% static 'img/editar.png' %}" alt=""></a>
+                            {% endif %}
+                        </div>
+                      </div>
+                      <div class="col-md-5 col-12 order-md-1 order-1 order-lg-2 d-flex justify-content-center justify-content-lg-start ">
+                          <a href="{% url 'producto:oferta_detalle' oferta.pk %}">
+                              <img src="{{ oferta.image.url }}" class="special-img mb-2 rounded-4" alt="Imagen de {{ oferta.nombreO }}" style="max-width: 100%; height: auto;">
+                          </a>
+                      </div>
+                  </div>
+                </div>
+              {% endif %}
+                  {% empty %}
+                    <div class="col-12 text-center text-light">
+                        <h5>No hay ofertas registradas por el momento.</h5>
+                    </div>
+          {% endfor %}
+
+        </div>
+
+        <!-- Navegación móvil -->
+        <div class="d-lg-none mt-4 d-flex justify-content-between align-items-center">
+          <button id="prevOferta" class="btn btn-outline-light">&laquo; Anterior</button>
+          <span id="currentOfertaIndex" class="text-white">1 / {{ ofertas|length }}</span>
+          <button id="nextOferta" class="btn btn-outline-light">Siguiente &raquo;</button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js "></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function () {
+    const totalTabs = {{ ofertas|length }};
+    let currentIndex = 0;
+
+    // Arreglo con los IDs reales de las pestañas
+    const tabIds = [];
+    {% for oferta in ofertas %}
+      tabIds.push('tab-{{ forloop.counter }}');
+    {% endfor %}
+
+    function showTab(index) {
+      // Ocultar todas
+      $('.tab-pane').removeClass('active show');
+      // Mostrar la actual
+      $(`#` + tabIds[index]).addClass('active show');
+      // Actualizar contador
+      $('#currentOfertaIndex').text(`${index + 1} / ${totalTabs}`);
+    }
+
+    $('#prevOferta').on('click', function () {
+      currentIndex = (currentIndex - 1 + totalTabs) % totalTabs;
+      showTab(currentIndex);
+    });
+
+    $('#nextOferta').on('click', function () {
+      currentIndex = (currentIndex + 1) % totalTabs;
+      showTab(currentIndex);
+    });
+
+    // Inicializar
+    showTab(currentIndex);
+  });
+</script>

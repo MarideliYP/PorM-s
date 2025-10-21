@@ -1,0 +1,220 @@
+{% load static %}
+{% load filters %}
+
+<!-- ======= Sección de Inmuebles ======= -->
+<section id="inmueble" class="menu section-bg" style="min-height: 40em">
+    <div class="container" data-aos="fade-up">
+        <!-- Título y botones de administración -->
+        {% if user.is_staff %}
+          <div class="section-title">
+            <h2>Administrar inmueble</h2>
+            <br>
+          </div>
+          <div class="d-flex section-title text-center justify-content-start text-dark mb-4">
+            <a href="{% url 'producto:addi' %}" class="book-a-table-btn nav-link me-3">Añadir inmueble</a>
+            <a href="{% url 'producto:gestionar_contrato' 'inmueble' %}" class="book-a-table-btn nav-link">Gestionar contrato</a>
+          </div>
+        {% endif %}
+
+        {% if user.is_authenticated and not user.is_staff %}
+            <a href="{% url 'producto:gestionar_contrato' 'inmueble' %}" class="book-a-table-btn nav-link mb-4 text-center">Gestionar contrato</a>
+        {% endif %}
+
+        <div class="menu-filter section-title d-flex justify-content-between">
+            <p>Inmuebles Disponibles</p>
+
+            <!-- Filtro desplegable por municipio -->
+            <div class="row justify-content-start mb-4" data-aos="fade-up" data-aos-delay="100">
+              <div class="col-lg-6 col-md-8">
+                <div class="dropdown w-50">
+                  <button
+                      class="btn btn-primary rounded-5 dropdown-toggle text-start"
+                      type="button"
+                      id="filtroMunicipio"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false">
+                    <i class="bi bi-funnel me-2"></i>
+                    <span id="filtro-texto">Todos los municipios</span>
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="filtroMunicipio" style="max-height: 300px; max-width: 210px; overflow-y: auto;">
+                    <li><a class="dropdown-item filtro-item" href="#" data-filter="*"><i class="bi bi-globe me-2"></i>Todos</a></li>
+                    <li><a class="dropdown-item filtro-item" href="#" data-filter=".filter-arroyo_naranjo">Arroyo Naranjo</a></li>
+                    <li><a class="dropdown-item filtro-item" href="#" data-filter=".filter-boyeros">Boyeros</a></li>
+                    <li><a class="dropdown-item filtro-item" href="#" data-filter=".filter-cerro">Cerro</a></li>
+                    <li><a class="dropdown-item filtro-item" href="#" data-filter=".filter-cotorro">Cotorro</a></li>
+                    <li><a class="dropdown-item filtro-item" href="#" data-filter=".filter-diez_de_octubre">Diez de Octubre</a></li>
+                    <li><a class="dropdown-item filtro-item" href="#" data-filter=".filter-guanabacoa">Guanabacoa</a></li>
+                    <li><a class="dropdown-item filtro-item" href="#" data-filter=".filter-habana_del_este">La Habana del Este</a></li>
+                    <li><a class="dropdown-item filtro-item" href="#" data-filter=".filter-habana_vieja">La Habana Vieja</a></li>
+                    <li><a class="dropdown-item filtro-item" href="#" data-filter=".filter-la_lisa">La Lisa</a></li>
+                    <li><a class="dropdown-item filtro-item" href="#" data-filter=".filter-marianao">Marianao</a></li>
+                    <li><a class="dropdown-item filtro-item" href="#" data-filter=".filter-playa">Playa</a></li>
+                    <li><a class="dropdown-item filtro-item" href="#" data-filter=".filter-plaza">Plaza de la Revolución</a></li>
+                    <li><a class="dropdown-item filtro-item" href="#" data-filter=".filter-regla">Regla</a></li>
+                    <li><a class="dropdown-item filtro-item" href="#" data-filter=".filter-san_miguel_del_padron">San Miguel del Padrón</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+        </div>
+
+        <!-- Grid de inmuebles -->
+        <div class="row menu-container justify-content-center" id="menu-wrapper" data-aos="fade-up" data-aos-delay="200">
+          {% for inmueble in inmuebles %}
+            <div class="col-lg-3 col-md-4 col-sm-6 menu-item {{ inmueble|get_filter_class }}">
+              <div class="card h-100 shadow-sm bg-dark text-white rounded-3 overflow-hidden">
+                <!-- Imagen clickeable -->
+                <div class="text-center">
+                  <a href="{% url 'producto:inmueble_detalle' inmueble.pk %}">
+                    <img src="{{ inmueble.image.url }}" class="card-img-top special-img" alt="Imagen de {{ inmueble.nombreI }}" style="object-fit: cover; width: 250px; height: 250px;">
+                  </a>
+                </div>
+
+                <!-- Contenido -->
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title text-start mb-2">{{ inmueble.nombreI }}</h5>
+                  <p class="card-text text-start mb-3 flex-grow-1">{{ inmueble.detalles|truncatechars:90 }}</p>
+
+                  <!-- Precio y botones -->
+                  <div class="btns d-flex justify-content-between">
+                    <span class="text-warning fs-5">${{ inmueble.precio }}</span>
+
+                    <!-- Botón de comentarios -->
+                    <a href="#" class="nav-link" data-bs-toggle="offcanvas" data-bs-target="#comentariosOffcanvas{{ inmueble.pk }}">
+                      <img src="{% static 'img/coment.png' %}" alt="Comentarios" style="width: 24px; height: 24px;">
+                    </a>
+
+                    <!-- Edición/Eliminación (solo staff) -->
+                    {% if user.is_staff or is_Administrador %}
+                      <div class="d-flex">
+                        <a href="{% url 'producto:updatei' inmueble.pk %}" class="nav-link">
+                          <img src="{% static 'img/editar.png' %}" alt="Editar" style="width: 24px; height: 24px;">
+                        </a>
+                        <a href="{% url 'producto:deletei' inmueble.pk %}" class="nav-link">
+                          <img src="{% static 'img/eliminar.png' %}" alt="Eliminar" style="width: 24px; height: 24px;">
+                        </a>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Offcanvas de comentarios -->
+            <div class="offcanvas offcanvas-end bg-dark text-light" tabindex="-1" id="comentariosOffcanvas{{ inmueble.pk }}" aria-labelledby="comentariosOffcanvasLabel{{ inmueble.pk }}" style="width: 400px; z-index: 8000;">
+              <div class="offcanvas-header border-bottom border-secondary">
+                <h5 class="offcanvas-title" id="comentariosOffcanvasLabel{{ inmueble.pk }}">Comentarios - {{ inmueble.nombreI }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+              </div>
+              <div class="offcanvas-body p-0">
+                <div class="mb-4 p-3">
+                  <h6 class="text-light">Opiniones de usuarios</h6>
+                  {% if inmueble.valoraciones.all %}
+                    {% for val in inmueble.valoraciones.all %}
+                      <div class="border-bottom border-secondary bg-light ps-3 mb-3 rounded p-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <strong class="text-dark">{{ val.usuario.username }}</strong>
+                          <small class="text-muted">{{ val.fecha|date:"d/m/Y" }}</small>
+                        </div>
+                        <div class="text-warning mt-1">
+                          {% for i in "12345" %}
+                            {% if forloop.counter <= val.valor %}
+                              <i class="bi bi-star-fill"></i>
+                            {% endif %}
+                          {% endfor %}
+                        </div>
+                        <p class="mb-0 mt-1 text-muted small">{{ val.comentario|default:"Sin comentario" }}</p>
+                      </div>
+                    {% endfor %}
+                  {% else %}
+                    <p class="text-muted small">No hay comentarios aún.</p>
+                  {% endif %}
+                </div>
+
+                <!-- Formulario de valoración -->
+                {% if user.is_authenticated %}
+                  <div class="border-top border-secondary p-3">
+                    <form method="post" action="{% url 'producto:crear_valoracion' inmueble.pk %}">
+                      {% csrf_token %}
+                      <h6 class="text-light">Deja tu opinión</h6>
+                      <div class="mb-3">
+                        <label class="form-label text-light">Calificación</label>
+                        <select name="valor" class="form-select" required>
+                          <option value="">Selecciona estrellas</option>
+                          <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                          <option value="4">⭐⭐⭐⭐ Bueno</option>
+                          <option value="3">⭐⭐⭐ Regular</option>
+                          <option value="2">⭐⭐ Malo</option>
+                          <option value="1">⭐ Pésimo</option>
+                        </select>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label text-light">Tu comentario (opcional)</label>
+                        <textarea name="comentario" class="form-control" rows="3" maxlength="1000" placeholder="Escribe tu opinión..."></textarea>
+                      </div>
+                      <button type="submit" class="btn btn-primary btn-sm">Enviar reseña</button>
+                    </form>
+                  </div>
+                {% else %}
+                  <div class="border-top border-secondary p-3">
+                    <p class="d-flex justify-content-between">
+                       Para dejar una reseña <a href="{% url 'user:login' %}" class="btn btn-outline-info ms-3">Inicia sesión</a>
+                    </p>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+              {% empty %}
+                <div class="col-12 text-center">
+                    <h5>No hay inmuebles registrados por el momento.</h5>
+                </div>
+          {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Isotope -->
+<script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const container = document.querySelector("#menu-wrapper");
+        const filtroTexto = document.getElementById("filtro-texto");
+        const filtroItems = document.querySelectorAll(".filtro-item");
+
+        let iso;
+
+        // Inicializar Isotope
+        if (container) {
+            iso = new Isotope(container, {
+                itemSelector: ".menu-item",
+                layoutMode: "fitRows",
+                transitionDuration: "0.4s"
+            });
+        }
+
+        // Aplicar filtro al hacer clic
+        filtroItems.forEach(item => {
+            item.addEventListener("click", function (e) {
+                e.preventDefault();
+
+                const filterValue = this.getAttribute("data-filter");
+                const text = this.textContent.trim();
+
+                // Actualizar texto del botón
+                filtroTexto.textContent = text;
+
+                // Cerrar dropdown
+                const dropdown = bootstrap.Dropdown.getInstance(document.getElementById("filtroMunicipio"));
+                if (dropdown) {
+                    dropdown.hide();
+                }
+
+                // Aplicar filtro
+                if (iso) {
+                    iso.arrange({ filter: filterValue });
+                }
+            });
+        });
+    });
+</script>

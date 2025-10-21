@@ -1,0 +1,71 @@
+{% load static %}
+
+<!-- ======= Empresa Section ======= -->
+<section id="empresas" class="empresa" style="min-height: 40em">
+    <div class="container" data-aos="fade-up">
+
+        <!-- Título y botones -->
+        {% if user.is_staff %}
+            <div class="section-title">
+                <h2>Administrar Empresas</h2>
+                <br>
+            </div>
+
+            <div class="d-flex section-title text-center justify-content-start text-light mb-4">
+                 <a href="{% url 'producto:addem' %}" class="book-a-table-btn nav-link me-3">Añadir empresa</a>
+                <a href="{% url 'producto:gestionar_contrato' 'empresa' %}" class="book-a-table-btn nav-link">Gestionar contrato</a>
+            </div>
+        {% elif user.is_authenticated %}
+            <div class="section-title text-center mb-4">
+                <a href="{% url 'producto:gestionar_contrato' 'empresa' %}" class="book-a-table-btn text-light nav-link">Gestionar contrato</a>
+            </div>
+        {% endif %}
+
+        <div class="section-title text-center">
+            <p>Gestión Empresarial</p>
+        </div>
+
+        <!-- Fila de empresas -->
+        <div class="row">
+            {% for empresa in empresas %}
+                <div class="col-lg-4 col-md-6 mt-lg-0 mb-5X">
+                    <div class="box position-relative h-100 rounded-2" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0|add:100 }}">
+
+                        <!-- Imagen como fondo de la mitad superior -->
+                        <a href="{% url 'producto:empresa_detalle' empresa.pk %}">
+                        <div class="position-relative" style="height: 180px; overflow: hidden;">
+
+                            <img class="empresa-img rounded-2" src="{{ empresa.image.url }}" alt="{{ empresa.nombre }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            <div class="rounded-2" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4);"></div>
+
+                            <!-- Número y nombre encima de la imagen -->
+                            <div class="position-absolute d-flex align-items-center" style="top: 15px; left: 15px; color: white; z-index: 2;">
+                                <span style="font-size: 1.60em; font-weight: bold;">
+                                    {{ forloop.counter|add:1|stringformat:"02d" }}
+                                    {{ empresa.nombre }}
+                                </span>
+                            </div>
+                        </div>
+                        </a>
+                        <!-- Descripción (mitad inferior) -->
+                        <div class="p-3">
+                            <p style="font-size: 0.95em; line-height: 1.6;">
+                                {{ empresa.description|truncatewords:20 }}
+                            </p>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            {% if user.is_staff or is_Administrador %}
+                              <a href="#" class="btn-menu m-2"><img src="{% static 'img/edit.png' %}" alt="" style="width: 2em; height: 2em"></a>
+                              <a href="{% url 'producto:deleteem' empresa.pk %}" class="btn-menu m-2"><img src="{% static 'img/elim.png' %}" alt="" style="width: 2em; height: 2em"></a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center text-light">
+                    <h5>No hay empresas registradas por el momento.</h5>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>

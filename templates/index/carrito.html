@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+    <div class="container aos-init aos-animate" data-aos="fade-up">
+
+        <div class="section-title">
+        <h2>Orden actual </h2>
+        <br>
+        <p>Articulos del carrito</p>
+        </div>
+    </div>
+
+
+    <div class="rounded-3">
+        <table class="table mb-0 tabla-hover rounded-3" >
+            <thead class="rounded-3" >
+            <tr>
+                <td>Nombre del articulo</td>
+                <td>Cantidad actual</td>
+                <td>Acciones</td>
+            </tr>
+            </thead>
+            <tbody class="table-group-divider rounded-3 border-start border-end ">
+            {% if articulos.count > 0 %}
+                {% for item in articulos %}
+                    <tr class="rounded-3">
+                        <td class="ps-5 pt-3">{{ item.producto }}</td>
+                        <td class="ps-5 pt-3">{{ item.cantidad }}
+                            {% if item.cantidad > 1%}
+                                unidades
+                            {% else %}
+                                unidad
+                            {% endif %}
+                        </td>
+                        <td style="width: 20em;">
+
+                            <button type="button" class="btn btn-outline-danger ms-3" data-bs-toggle="modal" data-bs-target="#deleteUserModal{{ instance.pk }}"><i class="ri-delete-bin-fill"></i>
+                                Eliminar
+                            </button>
+
+                            <div class="modal fade" id="deleteUserModal{{ instance.pk }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content" style="background: #212529;">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5" id="deleteUserLabel">Delete confirmation</h1>
+                                            <button type="button" class="btn-close btn-close-white " data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Estás seguro de querer quitar el artículo {{ item.producto }} de la compra?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+
+                                            <form method="post" action="{% url "delete" item.pk %}"> {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger">Sí, estoy seguro</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn btn-success">
+                                <a class="nav-link text-light" href="{% url "ajustar-carrito-item" item.pk "up" %}"><i class="bi bi-plus"></i></a>
+                            </button>
+                            <button type="button" class="btn btn-danger">
+                                <a class="nav-link text-light" href="{% url "ajustar-carrito-item" item.pk "down" %}"><i class="bi bi-dash"></i></a>
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+        </table>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end p-2">
+                <a href="{% url "enviar-carrito" %}" class="btn btn-outline-success">
+                    <i class="bi bi-currency-dollar"> Enviar Orden</i>
+                </a>
+            </div>
+        {% else %}
+            <div class="text-secondary text-center">
+            {% if user.is_autenticated %}
+                <h2>Parece que no tienes artículos en tu carrito todavía</h2>
+                <p style="font-size: 4em">¯\_(ツ)_/¯</p>
+            {% else %}
+                <h2>Debes registrarte para poder añadir artículos en tu carrito</h2>
+                <p style="font-size: 4em">¯\_(ツ)_/¯</p>
+            {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

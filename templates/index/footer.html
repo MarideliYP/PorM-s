@@ -1,0 +1,80 @@
+{% load static %}
+
+<footer id="footer">
+
+        <section class="footer__content d-flex flex-wrap justify-content-between">
+
+            <div class="footer__block mb-4 me-4 ms-4">
+                <div class="footer__body">
+
+                    <p class="footer__title">Más información</p>
+                    <p class="footer__more--info mb-1">Lorem ipsum dolor sit amet consectetur adipisicing elit. </p>
+                    <p class="footer__more--info mb-1">Doloribus in, quibusdam suscipit. </p>
+                    <p class="footer__more--info mb-1">Distinctio repellat corrupti blanditiis labore maiores.</p>
+
+                </div>
+            </div>
+
+            <div class="footer__block mb-4 me-4 ms-4">
+                <div class="footer__body">
+
+                    <p class="footer__title">Dónde encontrarnos</p>
+                    <p class="footer__address mb-1">No: 109.</p>
+                    <p class="footer__address mb-1">No: 210.</p>
+
+                </div>
+            </div>
+
+            <div class="footer__block mb-4 me-4 ms-4">
+                <div class="footer__body">
+
+                    <p class="footer__title">Teléfonos</p>
+                    <ul class="footer__list p-0">
+                        <li class="footer__item mb-1">+53 51748023</li>
+                        <li class="footer__item mb-1">+53 56512456</li>
+                        <li class="footer__item mb-1">+53 55856886</li>
+                        <li class="footer__item mb-1">+53 54678945</li>
+                    </ul>
+
+                </div>
+            </div>
+
+            <div class="footer__block mb-4 me-4 ms-4">
+                <div class="footer__body">
+
+                    <p class="footer__title">Redes sociales</p>
+                    <ul class="footer__list footer__list--icons ps-5">
+                        <li class="footer__item">
+                            <a href="#" class="footer__link"><img src="{% static 'svg/instagramw.svg' %}" alt=""></a>
+                        </li>
+                        <li class="footer__item">
+                            <a href="#" class="footer__link"><img src="{% static 'svg/telegram.svg' %}" alt=""></a>
+                        </li>
+                        <li class="footer__item">
+                            <a href="{% url 'producto:ir_facebook' %}" class="footer__link" target="_blank" rel="noopener noreferrer">
+                                <img src="{% static 'svg/facebook.svg' %}" alt="Grupo de Facebook">
+                            </a>
+                        </li>
+                        <li class="footer__item">
+                            <a href="#" class="footer__link"><img src="{% static 'svg/whatsapp.svg' %}" alt=""></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </section>
+
+        <section class="footer__policy d-flex flex-column align-items-center ps-0 m-0">
+            <div class="copyright pb-3" style="font-size: 0.8rem; color: #6c757d;">
+                © 2025－2028 PorMás S.A.
+            </div>
+
+            <ul class="footer__list--policy d-flex flex-wrap justify-content-center" style="width: 95%">
+                <li class="footer__item--policy"><a href="#">Políticas</a></li>
+                <li class="footer__item--policy"><a href="#">Términos de uso</a></li>
+                <li class="footer__item--policy"><a href="#">Derecho del cliente</a></li>
+                <li class="footer__item--policy"><a href="#">Sugerencias</a></li>
+            </ul>
+        </section>
+
+    </footer>

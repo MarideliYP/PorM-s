@@ -1,0 +1,109 @@
+{% extends 'base2.html' %}
+{% load static %}
+{% block content %}
+    <div class="form-container p-3">
+        <h1>📄 Gestionar contrato de {{ tipo }}</h1>
+        <p>Sigue estos pasos para completar tu proceso contractual:</p>
+        <div class="bg-dark rounded-3 p-2">
+            <div class="step">
+                <strong>1. Descargar el contrato</strong><br>
+                Descarga el contrato oficial para revisarlo y firmarlo.
+                {% if contrato %}
+                    <br>
+                    <a href="{{ contrato.archivo.url }}" class="btn btn-outline-primary border-0">
+                        📥 Descargar Contrato PDF
+                    </a>
+                {% else %}
+                    <p><em>⚠️ El contrato aún no ha sido publicado por el administrador.</em></p>
+                {% endif %}
+            </div>
+            <div class="step">
+                <strong>2. Llenar y firmar el contrato</strong><br>
+                Ábrelo en tu dispositivo y completa los espacios requeridos, imprímelo o en caso de tener firma digital, coloca tu firma en los espacios indicados.
+            </div>
+            <br>
+            <div class="step">
+                <strong>3. Subir el contrato firmado</strong><br>
+                Escanea o toma una foto clara del documento firmado y súbelo aquí.
+                <br>
+                <button type="button" class="btn btn-outline-info border-0" data-bs-toggle="modal" data-bs-target="#subirFirmadoModal">
+                    📤 Subir Contrato Firmado
+                </button>
+            </div>
+
+            {% if user.is_staff or is_Administrador %}
+            <div class="step">
+                <strong>4. Administrador: Subir nuevo contrato 🛠️ </strong><br>
+                Actualiza el contrato oficial que los usuarios descargan.
+                <br>
+                <button type="button" class="btn btn-outline-warning border-0" data-bs-toggle="modal" data-bs-target="#subirNuevoModal">
+                    📤 Subir Nuevo Contrato (Admin)
+                </button>
+            </div>
+            {% endif %}
+
+            <p class="note">
+                Una vez recibido el contrato firmado, validaremos la información y le notificaremos a su correo electrónico en menos de 30 días.
+            </p>
+        </div>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    <a class="btn btn-outline-light mt-3" href="{% url 'index' %}"><i class="bi bi-arrow-left me-1"></i>Volver al inicio</a>
+    </div>
+    <!-- Modal: Subir Contrato Firmado -->
+        <div class="modal fade" id="subirFirmadoModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="subirFirmadoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="background: #212529; color: white;">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="subirFirmadoModalLabel">Subir Contrato Firmado</h1>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                        <form method="POST" id="archivo-firmado-form" action="{% url 'producto:subir_contrato_firmado' tipo %}" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                    <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="archivo_firmado" class="form-label">Seleccione el contrato firmado (PDF o JPG)</label>
+                                <input type="file" class="form-control" id="archivo_firmado" name="archivo" accept=".pdf, .jpg" required>
+                                <small class="text-muted">Solo se permiten archivos en formato PDF o JPG.</small>
+                            </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">❌ Cancelar</button>
+                        <button type="submit" form="archivo-firmado-form" class="btn btn-success">📤 Subir</button>
+                    </div>
+                        </form>
+
+                </div>
+            </div>
+        </div>
+
+     <!-- Modal: Subir Nuevo Contrato (Admin) -->
+        <div class="modal fade" id="subirNuevoModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="subirNuevoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="background: #212529; color: white;">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="subirNuevoModalLabel">Subir Nuevo Contrato Oficial</h1>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="post" action="{% url 'producto:subir_contrato_admin' tipo %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="archivo_admin" class="form-label">Seleccione el nuevo contrato (PDF)</label>
+                                <input type="file" class="form-control" id="archivo_admin" name="archivo" accept=".pdf, .jpg" required>
+                                <small class="text-muted">Este contrato reemplazará al anterior.</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">❌ Cancelar</button>
+                            <button type="submit" class="btn btn-success">📤 Subir</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+{% endblock %}

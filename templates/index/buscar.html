@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container aos-init aos-animate" data-aos="fade-up" id="buscarH">
+
+    <div class="section-title text-center">
+        <h2>Resultados de la búsqueda</h2>
+        {% if termino %}
+            <p>Buscando: <strong>"{{ termino }}"</strong></p>
+        {% else %}
+            <p>Escribe algo en la barra de búsqueda.</p>
+        {% endif %}
+    </div>
+
+    <!-- Sección: Inmuebles -->
+    {% if inmuebles %}
+    <div class="section-title">
+        <p>Inmuebles</p>
+    </div>
+    <div class="row menu-container justify-content-center" data-aos="fade-up" data-aos-delay="200">
+        {% for inmueble in inmuebles %}
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-3 menu-item-1">
+            <div class="card h-100 shadow-sm text-white rounded-3 overflow-hidden" style="background: #000000;">
+                {% if inmueble.image %}
+                <img src="{{ inmueble.image.url }}" class="card-img-top special-img" alt="Inmueble {{ inmueble.nombreI }}" style="object-fit: cover; width: 350px; height: 300px;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ inmueble.nombreI }}</h5>
+                    <p class="card-text">{{ inmueble.detalles|truncatechars:100 }}</p>
+                    <p><strong>Municipio:</strong> {{ inmueble.tipo }}</p>
+                    <div class="btns p-0 border-0 d-flex justify-content-between">
+                        <span class="text-warning fs-5">${{ inmueble.precio }}</span>
+                        {% if user.is_authenticated %}
+                            <a href="#" class="nav-link">
+                              <img src="{% static 'img/coment.png' %}" alt="Comentarios" style="height: 30px; width: 30px">
+                            </a>
+                        {% endif %}
+                        {% if user.is_staff or is_Adminisrtador %}
+                            <a href="{% url 'producto:updatei' inmueble.pk %}" class="nav-link">
+                              <img src="{% static 'img/editar.png' %}" alt="Editar">
+                            </a>
+                            <a href="{% url 'producto:deletei' inmueble.pk %}" class="nav-link">
+                              <img src="{% static 'img/eliminar.png' %}" alt="Eliminar">
+                            </a>
+                        {% endif %}
+                  </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+
+
+    <!-- Sección: Ofertas -->
+    {% if ofertas %}
+    <div class="section-title">
+        <p>Ofertas</p>
+    </div>
+    <div class="row menu-container justify-content-center" data-aos="fade-up" data-aos-delay="200">
+        {% for oferta in ofertas %}
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-3 menu-item">
+            <div class="card h-100 shadow-sm text-white rounded-3 overflow-hidden" style="background: #2a2a3a;">
+                {% if oferta.image %}
+                <img src="{{ oferta.image.url }}" class="card-img-top special-img" alt="Oferta {{ oferta.nombreO }}" style="object-fit: cover; width: 350px; height: 300px;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ oferta.nombreO }}</h5>
+                    <p class="card-text">{{ oferta.description |truncatechars:100 }}</p>
+                    <div class="btns p-0 border-0 d-flex justify-content-between">
+                        <span class="text-warning fs-5">${{ oferta.precio }}</span>
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'producto:add_oferta_carrito' oferta.pk %}" class="nav-link">
+                            <img src="{% static 'img/añadir.png' %}" alt="Añadir al carrito">
+                        </a>
+                        {% endif %}
+                        {% if user.is_staff or is_Adminisrtador %}
+                        <a href="{% url 'producto:updateo' oferta.pk %}" class="nav-link">
+                            <img src="{% static 'img/editar.png' %}" alt="Editar">
+                        </a>
+                        <a href="{% url 'producto:deleteo' oferta.pk %}" class="nav-link">
+                            <img src="{% static 'img/eliminar.png' %}" alt="Eliminar">
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Sección: Productos -->
+    {% if productos %}
+    <div class="section-title">
+        <p>Productos</p>
+    </div>
+    <div class="row menu-container justify-content-center" data-aos="fade-up" data-aos-delay="200">
+        {% for producto in productos %}
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-3 menu-item">
+            <div class="card h-100 shadow-sm text-white rounded-3 overflow-hidden" style="background: #1e1e1e">
+                <div class="text-center">
+                    <img src="{{ producto.image.url }}" class="card-img-top special-img" alt="Imagen de {{ producto.nombreP }}" style="object-fit: cover; width: 350px; height: 300px;">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title text-start mb-2">{{ producto.nombreP }}</h5>
+                    <p class="card-text text-start mb-3 flex-grow-1">{{ producto.detalles|truncatechars:90 }}</p>
+                    <div class="btns p-0 border-0 d-flex justify-content-between">
+                        <span class="text-warning fs-5">${{ producto.precio }}</span>
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'producto:add_producto_carrito' producto.pk %}" class="nav-link">
+                            <img src="{% static 'img/añadir.png' %}" alt="Añadir al carrito">
+                        </a>
+                        {% endif %}
+                        {% if user.is_staff or is_Adminisrtador %}
+                        <a href="{% url 'producto:updatep' producto.pk %}" class="nav-link">
+                            <img src="{% static 'img/editar.png' %}" alt="Editar">
+                        </a>
+                        <a href="{% url 'producto:deletep' producto.pk %}" class="nav-link">
+                            <img src="{% static 'img/eliminar.png' %}" alt="Eliminar">
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Sección: Eventos -->
+    {% if eventos %}
+    <div class="section-title">
+        <p>Eventos</p>
+    </div>
+    <div class="row menu-container justify-content-center" data-aos="fade-up" data-aos-delay="200">
+        {% for evento in eventos %}
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-3 menu-item-1">
+            <div class="card h-100 shadow-sm text-white rounded-3 overflow-hidden" style="background: #2b3035;">
+                {% if evento.image %}
+                <img src="{{ evento.image.url }}" class="card-img-top special-img" alt="Evento {{ evento.nombreE }}" style="object-fit: cover; width: 350px; height: 300px;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ evento.nombreE }}</h5>
+                    <p class="card-text">{{ evento.description|truncatechars:100 }}</p>
+                    <p><strong>Capacidad total:</strong> {{ evento.capacidad }}</p>
+                    <div class="btns p-0 border-0 d-flex justify-content-between">
+                        <span class="text-warning fs-5">${{ evento.preciocover }}</span>
+                        {% if user.is_staff or is_Adminisrtador %}
+                        <a href="{% url 'producto:updatee' evento.pk %}" class="nav-link">
+                            <img src="{% static 'img/editar.png' %}" alt="Editar">
+                        </a>
+                        <a href="{% url 'producto:deletee' evento.pk %}" class="nav-link">
+                            <img src="{% static 'img/eliminar.png' %}" alt="Eliminar">
+                        </a>
+                        {% endif %}
+                        {% if user.is_authenticated %}
+                            <a class="btn btn-outline-warning d-inline-block position-relative p-0 pe-2" href="{% url 'producto:addr' evento.pk %}">
+                                <i class="bi-plus"></i>Reservar
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Mensaje si no hay resultados -->
+    {% if termino and not productos and not ofertas and not eventos and not inmuebles %}
+    <div class="text-center my-5 min-vh-100">
+        <h1>No se encontraron resultados para "<strong>{{ termino }}</strong>".</h1>
+        <a class="btn btn-outline-dark btn-sm px-4" href="{% url 'index' %}">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+
+    {% include 'index/hero.html' %}
+
+    {% if not user.is_authenticated %}
+        {% include 'index/about.html' %}
+    {% endif %}
+
+    {% include "inmueble/inmueble_list.html" %}
+    {% include "empresa/empresa_list.html" %}
+    {% include "oferta/oferta_list.html" %}
+    {% include "evento/evento_list.html" %}
+    {% include "producto/producto_list.html" %}
+
+    {% for message in messages %}
+        {% if 'error' in message.tags %}
+            <div class="z-3 message fade-in alert alert-danger position-absolute bottom-0 end-0 mb-5 me-3">
+                {{ message }}
+            </div>
+        {% elif 'success' in message.tags %}
+            <div class="z-3 message fade-in alert alert-success position-absolute bottom-0 end-0 mb-5 me-3">
+                {{ message }}
+            </div>
+        {% endif %}
+    {% endfor %}
+{% endblock %}
+
+
+{% block script %}
+    <script src="{% static 'js/homepage.js' %}"></script>
+{% endblock %}

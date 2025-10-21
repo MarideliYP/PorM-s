@@ -1,0 +1,165 @@
+{% load static %}
+
+<section id="events" class="events" style="min-height: 40em">
+  <div class="container" data-aos="fade-up">
+
+    <!-- Botón para administradores -->
+    {% if user.is_staff %}
+      <div class="section-title">
+        <h2>Administrar eventos</h2>
+        <br>
+        <a href="{% url 'producto:adde' %}" id="book-a-table-btn"
+           class="book-a-table-btn text-light nav-link d-lg-flex mt-4"
+           style="position: absolute;">Añadir nuevo Evento</a>
+      </div>
+    {% endif %}
+
+    <!-- Título para usuarios -->
+    <div class="section-title mt-5">
+      <p>Reserva tus entradas</p>
+    </div>
+
+    <!-- Contenedor de eventos -->
+    <div id="event-grid" class="row g-4 justify-content-center">
+      <!-- Aquí se mostrarán los eventos o el mensaje de "no hay eventos" -->
+    </div>
+
+    <!-- Paginación -->
+    <div class="d-flex justify-content-center mt-4">
+      <div id="pagination" class="btn-group" role="group" aria-label="Navegación de eventos">
+        <!-- Botones generados por JavaScript -->
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Scripts -->
+<script src="{% static 'js/jquery-3.7.1.min.js' %}" type="text/javascript"></script>
+<script>
+  $(document).ready(function () {
+    // Generar URL base para detalles
+    const baseDetalleUrl = "{% url 'producto:evento_detalle' 0 %}";
+    const baseUrl = baseDetalleUrl.replace('/0/', '/'); // Ej: "/producto/evento/"
+
+    // ✅ Verificar si hay eventos usando Django
+    const hayEventos = {% if eventos %}true{% else %}false{% endif %};
+
+    if (!hayEventos) {
+      // Mostrar mensaje si no hay eventos
+      $('#event-grid').html(`
+        <div class="text-center my-5">
+          <i class="bi bi-calendar-event text text-light" style="font-size: 3rem;"></i>
+          <p class="mt-3 fs-5 text-light">No hay eventos registrados por el momento.</p>
+        </div>
+      `);
+      $('#pagination').hide(); // Ocultar paginación
+      return;
+    }
+
+    // ✅ Si hay eventos, construir el array
+    const eventos = [
+      {% for evento in eventos %}
+        {% if not evento.empresa %}
+            {
+              nombreE: "{{ evento.nombreE|escapejs }}",
+              preciocover: "{{ evento.preciocover }}",
+              capacidad: "{{ evento.capacidad }}",
+              description: "{{ evento.description|escape|truncatechars:80|escapejs }}",
+              image: "{{ evento.image.url }}",
+              pk: {{ evento.pk }},
+              btns: `
+                <!-- Botón de reserva: para usuarios autenticados -->
+                {% if user.is_authenticated %}
+                  <a class="btn btn-primary d-inline-block position-relative" href="{% url 'producto:addr' evento.pk %}">
+                    <i class="bi bi-plus"></i> Reservar
+                  </a>
+                {% endif %}
+
+                <!-- Botones de edición/eliminación: solo para staff o administradores -->
+                {% if user.is_staff or is_Administrador %}
+                  <a href="{% url 'producto:updatee' evento.pk %}" class="btn-menu m-2">
+                    <img src="{% static 'img/editar.png' %}" alt="Editar" style="width: 24px; height: 24px;">
+                  </a>
+                  <a href="{% url 'producto:deletee' evento.pk %}" class="btn-menu m-2">
+                    <img src="{% static 'img/eliminar.png' %}" alt="Eliminar" style="width: 24px; height: 24px;">
+                  </a>
+                {% endif %}
+              `
+            },
+        {% endif %}
+      {% endfor %}
+    ];
+
+    const eventosPorPagina = 6;
+    let paginaActual = 0;
+
+    // Función para renderizar eventos de la página actual
+    function renderizarEventos(pagina) {
+      const start = pagina * eventosPorPagina;
+      const end = start + eventosPorPagina;
+      const eventosPagina = eventos.slice(start, end);
+
+      $("#event-grid").empty();
+
+      eventosPagina.forEach(evento => {
+        const detalleUrl = baseUrl + evento.pk + '/';
+
+        const html = `
+          <div class="col-md-6 col-sm-12 evento-card">
+            <div class="card mb-4 shadow-sm h-100 d-flex flex-md-row bg-dark text-white">
+              <a href="${detalleUrl}" class="text-decoration-none text-white d-flex align-items-center">
+                <img src="${evento.image}"
+                     class="card-img-left rounded-4"
+                     alt="${evento.nombreE}"
+                     style="width: 200px; height: 200px; object-fit: cover;">
+              </a>
+              <div class="card-body d-flex flex-column justify-content-between">
+                <div>
+                  <h5 class="card-title">${evento.nombreE}</h5>
+                  <p class="card-text">
+                    <strong>Precio:</strong> $${evento.preciocover}<br>
+                    <strong>Capacidad:</strong> ${evento.capacidad} personas
+                  </p>
+                  <p class="card-text">${evento.description}</p>
+                </div>
+                <div class="btns d-flex justify-content-between gap-2 flex-wrap">
+                  ${evento.btns}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        $("#event-grid").append(html);
+      });
+    }
+
+    // Función para generar botones de paginación
+    function generarPaginacion() {
+      const totalEventos = eventos.length;
+      const totalPages = Math.ceil(totalEventos / eventosPorPagina);
+
+      $("#pagination").empty();
+
+      for (let i = 0; i < totalPages; i++) {
+        const active = i === paginaActual ? "active" : "";
+        $("#pagination").append(`
+          <button type="button" class="btn btn-outline-primary ${active}" data-page="${i}">
+            ${i + 1}
+          </button>
+        `);
+      }
+    }
+
+    // Manejar clic en botones de paginación
+    $(document).on("click", "#pagination .btn", function () {
+      paginaActual = parseInt($(this).data("page"));
+      renderizarEventos(paginaActual);
+      generarPaginacion();
+    });
+
+    // Renderizar la primera página al cargar
+    renderizarEventos(paginaActual);
+    generarPaginacion();
+  });
+</script>

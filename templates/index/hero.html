@@ -1,0 +1,81 @@
+{% load static %}
+<!-- ======= Hero Section ======= -->
+<section id="hero" class="d-flex align-items-center" style="
+    background: url('{% static 'img/fondo1.jpg' %}');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    height: 100vh;
+    position: relative;
+">
+    <div class="container d-flex justify-content-between flex-wrap p-0 m-5" data-aos="zoom-in" data-aos-delay="100" style="z-index: 1; position: relative;">
+
+        <!-- Texto principal -->
+        <div class="baner-info d-flex rounded-4 justify-content-between">
+            {% if is_Empresa %}
+                <h1>Gestión de Empresa <span>Por Más</span></h1>
+            {% elif user.is_staff or is_Administrador %}
+                <h1>Administrar <span>Por Más</span></h1>
+            {% elif is_Gerente %}
+                <h1>Gestionar <span>Por Más</span></h1>
+            {% else %}
+                <div class="welcome d-inline-block">
+                    <h1>Bienvenidos a <span>Por Más</span></h1>
+                    <h4>Lo que no se muestra no se vende!</h4>
+                </div>
+
+                <div class="d-flex justify-content-center" data-aos="zoom-in" data-aos-delay="200">
+                  <a href="{% static 'img/Promo.mp4' %}" class="glightbox play-btn"></a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Carrusel de Empresas -->
+        <div class="carousel" id="carousel"></div>
+    </div>
+</section>
+
+<script>
+    const empresas = [
+        {% for empresa in empresas %}
+            {
+                nombre: "{{ empresa.nombre|escape }}",
+                descripcion: "{{ empresa.description|escape }}",
+                imagen: "{{ empresa.image.url }}",
+                url: "{% url 'producto:empresa_detalle' empresa.pk %}"
+            },
+        {% endfor %}
+    ];
+
+    if (empresas.length === 0) {
+        empresas.push({
+            nombre: "Sin promociones",
+            descripcion: "",
+            imagen: "",
+            url: "#"
+        });
+    }
+
+    const carousel = document.getElementById('carousel');
+
+    empresas.forEach((empresa, index) => {
+        const item = document.createElement('div');
+        item.classList.add('item');
+        item.style.setProperty('--index', index + 1);
+
+        item.innerHTML = `
+            <a href="${empresa.url}" class="nav-link item-link">
+                <div class="item-body pe-2">
+                    <div class="logo-circle" style="background-image: url('${empresa.imagen || '{% static 'img/logo.png' %}'}')"></div>
+                    <div class="text-content">
+                        <h4 class="title">${empresa.nombre}</h4>
+                        <p class="description">${empresa.descripcion}</p>
+                    </div>
+                </div>
+            </a>
+        `;
+
+        carousel.appendChild(item);
+    });
+</script>

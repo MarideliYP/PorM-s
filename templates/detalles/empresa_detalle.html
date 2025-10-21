@@ -1,0 +1,404 @@
+{% extends 'base.html' %}
+{% load filters %}
+{% load static %}
+
+{% block content %}
+<div class="section-title" style="margin-top: 9em">
+    <a href="{% url 'index' %}#empresas" class="nav-link">
+        <h2 class="detallesH2">Detalles de la empresa</h2>
+    </a>
+    <br>
+</div>
+
+<div class="container my-5 mt-2">
+    <div class="row g-2 bg-dark rounded-3">
+        <!-- Imagen principal + galería -->
+        <div class="col-md-5 m-0 p-2">
+            <div class="position-relative">
+
+                <div id="mainContent" class="w-100" style="height: 400px;">
+                    <img src="{{ empresa.image.url }}" class="w-100 h-100" style="object-fit: cover;">
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    {% if user.is_staff %}
+                        <a href="{% url 'producto:agregar_media' 'empresa' empresa.pk %}" class="btn btn-sm btn-outline-light position-absolute top-0">Añadir media</a>
+                    {% endif %}
+
+                    {% if medias %}
+                        <button id="toggleMediaBtn" class="btn btn-sm btn-outline-light position-absolute top-0 end-0">></button>
+                    {% endif %}
+                </div>
+                <!-- Contador de media -->
+                <div id="mediaCounter" class="position-absolute bottom-0 start-0 m-2 text-white bg-dark bg-opacity-50 px-2 py-1 rounded d-none">
+                    <small>1 / {{ empresa.media.count }}</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información -->
+        <div class="col-md-6 mt-4 ms-2 text-light">
+            <h1 class="mb-3">{{ empresa.nombre }}</h1>
+            <p class="fs-5">{{ empresa.description }}</p>
+
+            {% if user.is_staff %}
+                <ul class="list-unstyled text-start mt-4 mb-4">
+                    <li class="mb-3"><a href="{% url 'producto:adde-empresa' empresa.pk %}" class="btn btn-outline-warning">Añadir nuevo Evento</a></li>
+                    <li class="mb-3"><a href="{% url 'producto:addo-empresa' empresa.pk %}" class="btn btn-outline-warning">Añadir nueva Oferta</a></li>
+                    <li><a href="{% url 'producto:addp-empresa' empresa.pk %}" class="btn btn-outline-warning">Añadir nuevo producto</a></li>
+                </ul>
+            {% endif %}
+
+            <!-- Calificación -->
+            <div class="d-flex align-items-center mb-3">
+                <div class="me-2 fs-4 text-warning">
+                    {% with empresa.valoraciones.all|stars_info as stars %}
+                        {% for i in ""|ljust:stars.full %}
+                            <i class="bi bi-star-fill"></i>
+                        {% endfor %}
+                        {% if stars.half %}<i class="bi bi-star-half"></i>{% endif %}
+                        {% for i in ""|ljust:stars.empty %}
+                            <i class="bi bi-star"></i>
+                        {% endfor %}
+                    {% endwith %}
+                </div>
+                <span class="text-light">
+                    {% with avg=empresa.valoraciones.all|avg_rating total=empresa.valoraciones.all.count %}
+                        {{ avg|floatformat:1 }} ★ ({{ total }} reseñas)
+                    {% endwith %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+{% if ofertas %}
+    <!-- Sección de ofertas -->
+    <div class="mt-5 pt-4 border-top border-secondary">
+        <h3>Ofertas</h3>
+        <div class="row menu-container justify-content-center" data-aos="fade-up" data-aos-delay="200">
+            {% for oferta in ofertas %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-3 menu-item">
+                <div class="card h-100 shadow-sm text-white rounded-3 overflow-hidden" style="background: #2a2a3a;">
+                    {% if oferta.image %}
+                        <a href="{% url 'producto:oferta_detalle' oferta.pk %}">
+                            <img src="{{ oferta.image.url }}" class="card-img-top special-img mt-0" alt="Oferta {{ oferta.nombreO }}" style="object-fit: cover; width: 350px; height: 300px;">
+                        </a>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ oferta.nombreO }}</h5>
+                        <p class="card-text">{{ oferta.description |truncatechars:100 }}</p>
+                        <div class="btns p-0 border-0 d-flex justify-content-between">
+                            <span class="text-warning fs-5">${{ oferta.precio }}</span>
+                            {% if user.is_authenticated %}
+                            <a href="{% url 'producto:add_oferta_carrito' oferta.pk %}" class="nav-link">
+                                <img src="{% static 'img/añadir.png' %}" alt="Añadir al carrito">
+                            </a>
+                            {% endif %}
+                            {% if user.is_staff or is_Adminisrtador %}
+                            <a href="{% url 'producto:updateo' oferta.pk %}" class="nav-link">
+                                <img src="{% static 'img/editar.png' %}" alt="Editar">
+                            </a>
+                            <a href="{% url 'producto:deleteo' oferta.pk %}" class="nav-link">
+                                <img src="{% static 'img/eliminar.png' %}" alt="Eliminar">
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+{% if eventos %}
+    <!-- Sección de eventos -->
+    <div class="mt-5 pt-4 border-top border-secondary">
+        <h3>Eventos</h3>
+        <div class="row menu-container justify-content-center" data-aos="fade-up" data-aos-delay="200">
+            {% for evento in eventos %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-3 menu-item-1">
+                <div class="card h-100 shadow-sm text-white rounded-3 overflow-hidden" style="background: #2b3035;">
+                    {% if evento.image %}
+                        <a href="{% url 'producto:evento_detalle' evento.pk %}">
+                            <img src="{{ evento.image.url }}" class="card-img-top special-img mt-0" alt="Evento {{ evento.nombreE }}" style="object-fit: cover; width: 350px; height: 300px;">
+                        </a>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ evento.nombreE }}</h5>
+                        <p class="card-text">{{ evento.description|truncatechars:100 }}</p>
+                        <p><strong>Capacidad total:</strong> {{ evento.capacidad }}</p>
+                        <div class="btns p-0 border-0 d-flex justify-content-between">
+                            <span class="text-warning fs-5">${{ evento.preciocover }}</span>
+                            {% if user.is_staff or is_Adminisrtador %}
+                            <a href="{% url 'producto:updatee' evento.pk %}" class="nav-link">
+                                <img src="{% static 'img/editar.png' %}" alt="Editar">
+                            </a>
+                            <a href="{% url 'producto:deletee' evento.pk %}" class="nav-link">
+                                <img src="{% static 'img/eliminar.png' %}" alt="Eliminar">
+                            </a>
+                            {% endif %}
+                            {% if user.is_authenticated %}
+                                <a class="btn btn-outline-warning d-inline-block position-relative p-0 pe-2" href="{% url 'producto:addr' evento.pk %}">
+                                    <i class="bi-plus"></i>Reservar
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+{% if productos %}
+    <!-- Sección de productos -->
+    <div class="mt-5 pt-4 border-top border-secondary">
+    <h3>Productos</h3>
+        <div class="row menu-container justify-content-center" id="menu-wrapper" data-aos="fade-up" data-aos-delay="200">
+          {% for producto in productos %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-3 menu-item-1">
+                <div class="card h-100 shadow-sm text-white rounded-3 overflow-hidden" style="background: #2b3035;">
+                    <!-- Imagen centrada -->
+                      <a href="{% url 'producto:producto_detalle' producto.pk %}">
+                        <img src="{{ producto.image.url }}" class="card-img-top special-img mt-0" alt="Imagen de {{ producto.nombreP }}" style="object-fit: cover; width: 350px; height: 300px;">
+                      </a>
+                    <!-- Contenido -->
+                    <div class="card-body d-flex flex-column">
+                      <h5 class="card-title text-start mb-2">{{ producto.nombreP }}</h5>
+                      <p class="card-text text-start mb-3 flex-grow-1">{{ producto.detalles|truncatechars:90 }}</p>
+
+                      <!-- Precio y botones -->
+                      <div class="btns p-0 border-0 d-flex justify-content-between">
+                        <span class="text-warning fs-5">${{ producto.precio }}</span>
+
+                          {% if user.is_authenticated %}
+                            <a href="{% url 'producto:add_producto_carrito' producto.pk %}" class="nav-link" title="Añadir al carrito">
+                              <img src="{% static 'img/añadir.png' %}" alt="Añadir al carrito">
+                            </a>
+                          {% endif %}
+
+                          {% if user.is_staff or is_Administrador %}
+                            <a href="{% url 'producto:updatep' producto.pk %}" class="nav-link" title="Editar">
+                              <img src="{% static 'img/editar.png' %}" alt="Editar">
+                            </a>
+                            <a href="{% url 'producto:deletep' producto.pk %}" class="nav-link" title="Eliminar">
+                              <img src="{% static 'img/eliminar.png' %}" alt="Eliminar">
+                            </a>
+                          {% endif %}
+                      </div>
+                    </div>
+                </div>
+            </div>
+          {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+    <!-- Sección de reseñas -->
+    <div class="mt-5 pt-4 border-top border-secondary">
+        <h3 class="mb-4">Reseñas de usuarios</h3>
+
+        <!-- Formulario de valoración -->
+        {% if user.is_authenticated %}
+        <div class="card bg-dark text-light p-4 mb-4 shadow-sm">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label>¿Cómo fue tu experiencia?</label>
+                    <select name="valor" class="form-select" required>
+                        <option value="">Califica la empresa</option>
+                        <option value="5">5 ⭐ - Excelente</option>
+                        <option value="4">4 ⭐ - Muy buena</option>
+                        <option value="3">3 ⭐ - Regular</option>
+                        <option value="2">2 ⭐ - Podría mejorar</option>
+                        <option value="1">1 ⭐ - Mala</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label>Comparte tu opinión</label>
+                    <textarea name="comentario" class="form-control" rows="3" placeholder="¿Qué te gustó? ¿Qué cambiarías?"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Enviar reseña</button>
+            </form>
+        </div>
+        {% else %}
+        <p class="text-muted mb-4">
+            <a href="{% url 'user:login' %}" class="btn btn-info">Inicia sesión</a> para dejar una reseña.
+        </p>
+        {% endif %}
+
+        <!-- Lista de reseñas -->
+        <div class="mt-4">
+            {% if valoraciones %}
+                {% for val in valoraciones %}
+                <div class="border-bottom border-secondary ps-3 mb-3 bg-light rounded-3 p-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">{{ val.usuario.username }}</h6>
+                        <small class="text-muted">{{ val.fecha|date:"d/m/Y" }}</small>
+                    </div>
+
+                    <!-- Estrellas -->
+                    <div class="text-warning">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= val.valor %}
+                                <i class="bi bi-star-fill"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- Comentario -->
+                    <p class="mb-0 mt-2">{{ val.comentario|default:"Sin comentario" }}</p>
+
+                    <!-- Botones: Editar y Eliminar (solo para el dueño) -->
+                    {% if user == val.usuario %}
+                    <div class="mt-2 d-flex gap-2 justify-content-end">
+                        <!-- Botón Editar -->
+                        <button type="button" class="btn btn-sm btn-outline-warning"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editarValoracionModal{{ val.pk }}">
+                            <i class="bi bi-pencil"></i> Editar
+                        </button>
+                        <!-- Botón Eliminar -->
+                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                data-bs-toggle="modal"
+                                data-bs-target="#eliminarValoracionModal{{ val.pk }}">
+                            <i class="bi bi-trash"></i> Eliminar
+                        </button>
+                    </div>
+
+                    <!-- Modal: Editar Valoración -->
+                    <div class="modal fade" id="editarValoracionModal{{ val.pk }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content bg-dark text-light">
+                                <div class="modal-header border-secondary">
+                                    <h5 class="modal-title">Editar reseña</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form method="post" action="{% url 'producto:editar_valoracion' val.pk %}">
+                                    {% csrf_token %}
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label>Calificación</label>
+                                            <select name="valor" class="form-select" required>
+                                                {% for i in "54321" %}
+                                                    <option value="{{ i }}" {% if i|add:"0" == val.valor %}selected{% endif %}>
+                                                        {% for j in ""|ljust:i %}⭐{% endfor %} ({{ i }})
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label>Comentario</label>
+                                            <textarea name="comentario" class="form-control" rows="3">{{ val.comentario }}</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer border-secondary">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-warning">Guardar cambios</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal: Eliminar Valoración -->
+                    <div class="modal fade" id="eliminarValoracionModal{{ val.pk }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content bg-dark text-light">
+                                <div class="modal-header border-secondary">
+                                    <h5 class="modal-title text-danger">Eliminar reseña</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    ¿Estás seguro de que deseas eliminar tu reseña para <strong>{{ oferta.nombreO }}</strong>?
+                                </div>
+                                <div class="modal-footer border-secondary">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <a href="{% url 'producto:eliminar_valoracion' val.pk %}" class="btn btn-danger">Eliminar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">Sé el primero en comentar sobre esta empresa.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // === Paso 1: Obtener el contenedor ===
+    const mainContent = document.getElementById('mainContent');
+    const toggleBtn = document.getElementById('toggleMediaBtn');
+
+    // === Paso 2: Datos desde Django ===
+    const empresaImage = "{{ empresa.image.url }}";
+    const empresaNombre = "{{ empresa.nombre }}";
+
+    // Lista de media con URL y tipo
+    const mediaList = [
+        {% for media in medias %}
+            {
+                url: "{{ media.archivo.url }}",
+                tipo: "{{ media.tipo }}"  // 'imagen' o 'video'
+            },
+        {% endfor %}
+    ];
+
+    // === Paso 3: Crear lista completa: [imagen principal] + media
+    const allItems = [
+        { url: empresaImage, tipo: 'imagen', nombre: empresaNombre }
+    ];
+
+    mediaList.forEach(media => {
+        allItems.push({
+            url: media.url,
+            tipo: media.tipo
+        });
+    });
+
+    let currentIndex = 0;
+
+    // === Paso 4: Función para mostrar cualquier item ===
+    function showItem(item) {
+        mainContent.innerHTML = ''; // Limpiar contenido
+
+        if (item.tipo === 'video') {
+            const video = document.createElement('video');
+            video.src = item.url;
+            video.controls = true;
+            video.autoplay = true;
+            video.muted = true;
+            video.loop = true;
+            video.classList.add('w-100', 'h-100');
+            video.style.objectFit = 'cover';
+            mainContent.appendChild(video);
+
+        } else if (item.tipo === 'imagen') {  // ✅ 'else if' y tipo correcto
+            const img = document.createElement('img');  // ✅ 'img', no 'imagen'
+            img.src = item.url;
+            img.alt = item.nombre || 'Imagen';
+            img.classList.add('w-100', 'h-100');
+            img.style.objectFit = 'cover';
+            mainContent.appendChild(img);
+        }
+    }
+
+    // === Paso 5: Mostrar la imagen principal al cargar
+    showItem(allItems[0]);
+
+    // === Paso 6: Ocultar botón si no hay media adicional
+    if (mediaList.length === 0) {
+        toggleBtn.style.display = 'none';
+    }
+
+    // === Paso 7: Evento al hacer clic en ">"
+    toggleBtn.addEventListener('click', function () {
+        currentIndex = (currentIndex + 1) % allItems.length;
+        showItem(allItems[currentIndex]);
+    });
+</script>
+{% endblock %}
