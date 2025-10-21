@@ -10,16 +10,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # === SEGURIDAD Y ENTORNO ===
 # =============================================================================
 
-SECRET_KEY = "django-insecure-b2p^jpr$j0^ff4nra&-ch@p$m*i=63&!5eqfg5irppz(z@-7pv"
-# SECRET_KEY = os.getenv('SECRET_KEY')
-# if not SECRET_KEY:
-#     raise ValueError("La variable de entorno SECRET_KEY es obligatoria.")
+SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY:
+    raise ValueError("La variable de entorno SECRET_KEY es obligatoria.")
 
-# DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-DEBUG = 'True'
 
-# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '.railway.app').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '.railway.app').split(',')
 
 # =============================================================================
 # === APLICACIONES ===
@@ -73,19 +71,19 @@ AUTH_USER_MODEL = 'user.User'
 # === BASE DE DATOS ===
 # =============================================================================
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
-
 # DATABASES = {
-#     'default': dj_database_url.config(
-#         default=os.getenv('DATABASE_URL', 'sqlite:///db.sqlite3')
-#     )
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
 # }
+
+
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL', 'sqlite:///db.sqlite3')
+    )
+}
 
 # =============================================================================
 # === CONTRASEÑAS ===
@@ -177,3 +175,4 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
 # =============================================================================
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
