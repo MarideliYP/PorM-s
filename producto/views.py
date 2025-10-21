@@ -50,11 +50,24 @@ def es_flotante(user):
 
 
 def vistaprincipal(request):
-    # Verificar roles del usuario
-    is_administrador = request.user.is_staff
-    is_cliente = request.user.groups.filter(name='Cliente').exists()
-    is_repartidor = request.user.groups.filter(name='Repartidor').exists()
-    is_empresa = request.user.groups.filter(name='Empresa').exists()
+    # Verificar roles del usuario (solo si existe en la DB actual)
+    is_administrador = False
+    is_cliente = False
+    is_repartidor = False
+    is_empresa = False
+
+    if request.user.is_authenticated:
+        try:
+            # Forzar carga del usuario desde la DB actual
+            request.user.groups.exists()
+            is_administrador = request.user.is_staff
+            is_cliente = request.user.groups.filter(name='Cliente').exists()
+            is_repartidor = request.user.groups.filter(name='Repartidor').exists()
+            is_empresa = request.user.groups.filter(name='Empresa').exists()
+        except User.DoesNotExist:
+            # Usuario huérfano: cerrar sesión
+            logout(request)
+            return redirect('index')
 
     context = {
         'productos': Producto.objects.all(),
@@ -71,32 +84,33 @@ def vistaprincipal(request):
     }
 
     if request.user.is_authenticated:
-        reservas = Reserva.objects.filter(usuario=request.user)
-        context['reservas'] = reservas
+        try:
+            # Repetir la verificación para el bloque autenticado
+            request.user.groups.exists()
+            reservas = Reserva.objects.filter(usuario=request.user)
+            context['reservas'] = reservas
+            contratos = ContratoFirmado.objects.filter(usuario=request.user)
+            context['contratos'] = contratos
 
-        contratos = ContratoFirmado.objects.filter(usuario=request.user)
-        context['contratos'] = contratos
+            carritos = CarroCompra.objects.filter(usuario=request.user, pagado=False, cerrado=False)
+            if carritos.exists():
+                carrito = carritos.first()
+            else:
+                carrito = CarroCompra.objects.create(usuario=request.user)
 
-        # Manejo del carrito
-        carritos = CarroCompra.objects.filter(usuario=request.user, pagado=False, cerrado=False)
-        if carritos.exists():
-            carrito = carritos.first()
-        else:
-            carrito = CarroCompra.objects.create(usuario=request.user)
-
-        # Calcular cuenta pendiente de envío (carritos enviados pero no pagados)
-        pagados = CarroCompra.objects.filter(usuario=request.user, pagado=True, cerrado=False)
-        cuenta_total = sum(carrito.precio_total() for carrito in pagados)
-
-        context.update({
-            'pagados': pagados.exists(),
-            'cuenta_total': cuenta_total,
-            'carrito': carrito,
-            'precio_total': carrito.precio_total(),
-            'articulos': carrito.items.all(),
-            'reserva_forms': [(reserva, Reserva_form(instance=reserva)) for reserva in context['reservas']],
-
-        })
+            pagados = CarroCompra.objects.filter(usuario=request.user, pagado=True, cerrado=False)
+            cuenta_total = sum(carrito.precio_total() for carrito in pagados)
+            context.update({
+                'pagados': pagados.exists(),
+                'cuenta_total': cuenta_total,
+                'carrito': carrito,
+                'precio_total': carrito.precio_total(),
+                'articulos': carrito.items.all(),
+                'reserva_forms': [(reserva, Reserva_form(instance=reserva)) for reserva in context['reservas']],
+            })
+        except User.DoesNotExist:
+            logout(request)
+            return redirect('index')
 
     return render(request, 'index/index.html', context)
 
@@ -1232,3 +1246,4 @@ def limpiar_reservas(request):
         messages.info(request, "✅ No había reservas caducadas para eliminar.")
 
     return redirect('user:list')
+
