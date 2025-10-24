@@ -1247,3 +1247,4 @@ def limpiar_reservas(request):
 
     return redirect('user:list')
 
+
